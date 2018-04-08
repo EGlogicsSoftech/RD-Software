@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Grn extends CI_Controller {
+class Supplier_bill extends CI_Controller {
 
 	/**
 	 * Index Page for this controller.
@@ -43,39 +43,40 @@ class Grn extends CI_Controller {
 
 	public function add()
 	{
-		if( !is_UserAllowed('add_grn')){ header('Location: '.base_url().'admin/dashboard'); }
+		//if( !is_UserAllowed('add_grn')){ header('Location: '.base_url().'admin/dashboard'); }
 		
-		$data['title']='Add GRN';
-		$data['bills']= GetAllBills();
+		$data['title']='Add Supplier Bill';
+		$data['suppliers']= GetAllSupplier();
 		$data['items']= GetItem();
 		$data['msg']=$this->session->flashdata('msg');
 		//$data['sup_pos']= GetAllSupplierPO();
 		
-    	$this->RedirectToPageWithData('grn/add_grn',$data);
+    	$this->RedirectToPageWithData('supplier_bill/add_bill',$data);
 	}
 	
 	public function getitem()
 	{
-		$sup_id= $_POST['sup_id'];
-		$sup_pos = $this->Admin_model->getPObySupplier($sup_id);
+		$sup_po_id = $_POST['sup_po_id'];
+		
+		$items = $this->db->get_where('supplier_po_item',array('sup_po_id'=>$sup_po_id))->result_array();
+		
+		$html ="<option value=''>Select Item</option>";
 
-		$html ="<option value=''>Select Supplier PO</option>";
-
-		foreach($sup_pos as $sup_po)
+		foreach($items as $item)
 			{
-				$html .='<option value="'.$sup_po['sup_po_id'].'">'.$sup_po['po_num'].'</option>';
+				$html .='<option value="'.$item['item_id'].'">'.GetItemData( $item['item_id'] )->ITEM_CODE.'</option>';
 			}
 
 		echo $html;
 	}
 
-	public function grnlist()
+	public function all_bills()
 	{
-		if( !is_UserAllowed('all_grn')){ header('Location: '.base_url().'admin/dashboard'); }
+		//if( !is_UserAllowed('all_grn')){ header('Location: '.base_url().'admin/dashboard'); }
 		
-		$data['title']='Manage GRN';
-		$data['grns']= GetGRNs();
-		$this->RedirectToPageWithData('grn/all_grn',$data);
+		$data['title']='Manage Bills';
+		$data['bills']= GetBills();
+		$this->RedirectToPageWithData('supplier_bill/all_bills',$data);
 	}
 	
 	public function Export_PDF($id)
@@ -276,31 +277,26 @@ class Grn extends CI_Controller {
 			$objWriter->save('php://output');
 				 
 		}
-	
-	function file_selected_test()
-	{
 
-		    $this->form_validation->set_message('file_selected_test', 'Please select file.');
-		    if (empty($_FILES['challan_img']['name'])) {
-		            return false;
-		        }else{
-		            return true;
-		        }
-		}
-		
-	function saveGrn()
+	function saveBill()
 	{
-		$sub_grns = @$this->input->post('sub_grn_group');
+		//$sub_grns = @$this->input->post('sub_grn_group');
 		$created_by = $this->db->get_where('login',array('id'=>$this->session->userdata('id')))->row('id'); 
 
 		$timestamp = $this->input->post('challan_date');
-		$date1 = strtr($timestamp, '/', '-');
-		$challan_date = date('Y-m-d', strtotime($date1));
+		//$date1 = strtr($timestamp, '/', '-');
+		//date_default_timezone_set("Asia/Calcutta");
+		//$challan_date = date('Y-m-d', strtotime($date1));
 		$grn_status = 0;
 		
 		$this->form_validation->set_error_delimiters('<p class="text-red">', '</p>');
-		$this->form_validation->set_rules('gn_no','GRN No',  'required|is_unique[grn.grn_number]');
-		$this->form_validation->set_rules('bill_id','Bill Id',  'required');
+		//$this->form_validation->set_rules('gn_no','GRN No',  'required');
+	    $this->form_validation->set_rules('supplier_id','Supplier Id',  'required');
+	    //$this->form_validation->set_rules('supplier_pon','Supplier PO No',  'required');
+	    $this->form_validation->set_rules('challan_no','Challan No',  'required|is_unique[supplier_bill.challan_num]');
+	    $this->form_validation->set_rules('challan_date','Challan date',  'required');
+	   	//$this->form_validation->set_rules('challan_img','Challan PDF', 'required');
+	    $this->form_validation->set_rules('box_no','Box No',  'required');
 	 	$this->form_validation->set_rules('validate', 'validate', 'callback_check_database');
 
 		if($this->form_validation->run() == FALSE) // validation hasn't been passed
@@ -309,23 +305,51 @@ class Grn extends CI_Controller {
 			}
 		else
 			{
+				if($_FILES['challan_img']['name']!='')
+					{
+						$_FILES['challan_img']['name'];
+				
+						$config['image_library'] = 'ImageMagick';
+						$config['upload_path'] = './uploads/grn_images/';
+						$config['allowed_types'] = 'pdf';
+						$config['quality']	= '80';
+						
+						$this->load->library('upload');
+						
+						$this->upload->initialize($config);
+						$UploadLogo = $this->upload->do_upload('challan_img');
+						
+						$Logoinfo=$this->upload->data();
+						//var_dump($Logoinfo);
+						//die();
+						$uploadedImageName=$Logoinfo['file_name']; 
+					}
+				else
+					{
+						$uploadedImageName='';
+					}
+					
 				$data = array(
-					'grn_id' => time(),
-					'grn_number' => @$this->input->post('gn_no'),
-					'bill_id' => @$this->input->post('bill_id')
+					'bill_id' => time(),
+					'sup_id' => @$this->input->post('supplier_id'),
+					'challan_num' => @$this->input->post('challan_no'),
+					'challan_date' => @$timestamp,
+					'challan_img' => @$uploadedImageName,
+					'num_of_box' => @$this->input->post('box_no'),
+					'created_by' => $created_by
 				);
 				
-				$result = $this->Admin_model->saveGrn($data);
+				$result = $this->Admin_model->saveBill($data);
 	
 				if ($result == false) // the information has therefore been successfully saved in the db
 					{
 						$this->session->set_flashdata('msg','<span class="text-red">An error occurred saving your information. Please try again later</span>');
-						redirect(base_url().'grn/add');   // or whatever logic needs to occur
+						redirect(base_url().'supplier_bill/add');   // or whatever logic needs to occur
 					}
 				else
 					{
 						$this->session->set_flashdata('msg','<span class="text-green">New GRN added successfully.</span>');
-						redirect(base_url().'grn/view/'.$result);   // or whatever logic needs to occur	
+						redirect(base_url().'supplier_bill/view/'.$result);   // or whatever logic needs to occur	
 					}
 			}
 	}
@@ -384,28 +408,22 @@ class Grn extends CI_Controller {
 
 	public function view($id)
 	{
-		$data['title']='View GRN';
-		$data['grn']=$this->db->get_where('grn',array('ID'=>$id))->row();
+		$data['title']='View Bills';
+		$data['bill'] = $this->db->get_where('supplier_bill',array('id'=>$id))->row();
 		//$data['items']= GetItem();
 		$data['msg']=$this->session->flashdata('msg');
-		$this->RedirectToPageWithData('grn/view',$data);
+		$this->RedirectToPageWithData('supplier_bill/view',$data);
 	}
 	
-	function saveGrnItem($id)
+	function saveBillItem($id)
 	{
-	
-		$recived_qty = @$this->input->post('received_qty');
 		
-		if($recived_qty != 0)
-			{
-				$recived_qty = $recived_qty+1;
-			}
 		$this->form_validation->set_message('less_than', 'accepted quantity can not be more than recived quantity');
 		$this->form_validation->set_error_delimiters('<p class="text-red">', '</p>');
+		$this->form_validation->set_rules('spo','Supplier PO',  'required');
 	 	$this->form_validation->set_rules('item_id','item Id',  'required');
 		$this->form_validation->set_rules('challan_qty','Challan Qty',  'required');
-		$this->form_validation->set_rules('received_qty','Received Qty',  'required');
-		$this->form_validation->set_rules('accepted_qty','Accepted Qty',  'required|less_than['.$recived_qty.']');
+		$this->form_validation->set_rules('total_gst','Total GST',  'required');
 	 	$this->form_validation->set_rules('validate', 'validate', 'callback_check_database');
 		
 		if($this->form_validation->run() == FALSE) // validation hasn't been passed
@@ -414,29 +432,28 @@ class Grn extends CI_Controller {
 			}
 		else 
 			{
-				$GrnItemData = array(
-					'grn_row_id' => @$this->input->post('grn_id'),
+				$data = array(
+					'bill_id' => @$this->input->post('bill_id'),
+					'supplier_po_id' => @$this->input->post('spo'),
 					'item_id' => @$this->input->post('item_id'),
 					'challan_qty' => @$this->input->post('challan_qty'),
-					'received_qty' => @$this->input->post('received_qty'),
-					'accepted_qty' => @$this->input->post('accepted_qty'),
-					'remarks' => @$this->input->post('remarks'),
+					'gst' => @$this->input->post('total_gst'),
 				);
 	
-				$result = $this->Admin_model->SaveGrnItem($GrnItemData);
+				$result = $this->Admin_model->SaveBillItem($data);
 				
-				$grn_row_id = $this->db->get_where('grn_item',array('id'=> $result))->row('grn_row_id');
-				$grn_id = $this->db->get_where('grn',array('grn_id'=> $grn_row_id))->row('id');
+				//$grn_row_id = $this->db->get_where('grn_item',array('id'=> $result))->row('grn_row_id');
+				//$grn_id = $this->db->get_where('grn',array('grn_id'=> $grn_row_id))->row('id');
 
 				if ($result == false) 
 					{
 						$this->session->set_flashdata('msg','<span class="text-red">An error occurred saving your information. Please try again later</span>');
-						redirect(base_url().'grn/view/'.$grn_id);   // or whatever logic needs to occur
+						redirect(base_url().'supplier_bill/view/'.$id);   // or whatever logic needs to occur
 					}
 				else
 					{
 						$this->session->set_flashdata('msg','<span class="text-green">Item added successfully.</span>');
-						redirect(base_url().'grn/view/'.$grn_id);   // or whatever logic needs to occur	
+						redirect(base_url().'supplier_bill/view/'.$id);   // or whatever logic needs to occur	
 					}
 			}
 	}
@@ -451,23 +468,23 @@ class Grn extends CI_Controller {
 		$this->RedirectToPageWithData('grn/edit',$data);
 	}
 	
-	public function approve_grn($gid)
+	public function approve_bill($bid)
 		{
-			if( !is_UserAllowed('approve_grn')){ header('Location: '.base_url().'admin/dashboard'); }
+			//if( !is_UserAllowed('approve_grn')){ header('Location: '.base_url().'admin/dashboard'); }
 			
 			$uid = $this->db->get_where('login',array('id'=>$this->session->userdata('id')))->row('id');
 			
-			$result = $this->Admin_model->ApproveGRN($gid, $uid);
+			$result = $this->Admin_model->ApproveBILL($bid, $uid);
 			
 			if ($result == false) 
 					{
 						$this->session->set_flashdata('msg','<span class="text-red">An error occurred saving your information. Please try again later</span>');
-						redirect(base_url().'grn/view/'.$result);   // or whatever logic needs to occur
+						redirect(base_url().'supplier_bill/view/'.$result);   // or whatever logic needs to occur
 					}
 				else
 					{
 						$this->session->set_flashdata('msg','<span class="text-green">Item added successfully.</span>');
-						redirect(base_url().'grn/view/'.$result);   // or whatever logic needs to occur	
+						redirect(base_url().'supplier_bill/view/'.$result);   // or whatever logic needs to occur	
 					}
 			
 		}
@@ -543,6 +560,17 @@ class Grn extends CI_Controller {
 				$this->session->set_flashdata('msg','<span class="text-green">Item added successfully.</span>');
 				redirect(base_url().'grn/view/'.$grnID);   // or whatever logic needs to occur	
 			}
+	}
+	
+	function get_SPO_item_price()
+	{
+		$item_id = $_POST['item_id'];
+		
+		$spo_id = $_POST['spo_id'];
+		
+		$price = $this->db->get_where('supplier_po_item',array('sup_po_id'=>$spo_id, 'item_id'=>$item_id))->row('price');
+		
+		echo $price;
 	}
 	
 }

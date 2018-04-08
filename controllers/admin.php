@@ -57,8 +57,8 @@ class Admin extends CI_Controller {
 			}
 			else
 			{
-			echo $pass = md5($this->input->post('password'));
-			echo $email = $this->input->post('email');
+			$pass = md5($this->input->post('password'));
+			$email = $this->input->post('email');
 			$user_id = $this->db->get_where('login',array('email'=>$email,'password'=>$pass,'status'=>1) )->row('id');
 			
 			if(is_numeric($user_id))

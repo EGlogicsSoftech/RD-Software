@@ -407,6 +407,17 @@
 
 			return $items;
 		}
+	
+	// LIST OF ITEMS OF SUPPLIER BILL
+	function Get_Items_of_bill($bid)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$items = $ci->db->get_where('bill_item',array('bill_id'=>$bid))->result_array();
+
+			return $items;
+		}
 
 	function GetStockIssueItems($id)
 		{
@@ -424,6 +435,16 @@
 		    $ci->load->database();
 
 			$data = $ci->db->get_where('grn_item',array('grn_row_id'=>$id))->result_array();
+
+			return $data;
+		}
+		
+	function GetBillItems($id)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$data = $ci->db->get_where('bill_item',array('bill_id'=>$id))->result_array();
 
 			return $data;
 		}
@@ -487,6 +508,16 @@
 
 			return $Suppliers;
 		}
+		
+	function GetAllBills()
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$Suppliers = $ci->db->get_where('supplier_bill',array('status'=>'1'))->result_array();
+
+			return $Suppliers;
+		}
 
 	function GetAllSupplierPO()
 		{
@@ -536,6 +567,16 @@
 			$grns = $ci->db->get_where('grn', array('status >'=> 0))->result_array();
 
 			return $grns;
+		}
+		
+	function GetBills()
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$bills = $ci->db->get_where('supplier_bill', array('status >'=> 0))->result_array();
+
+			return $bills;
 		}
 
 	function GetGRNno($id)
@@ -979,5 +1020,26 @@
 // 			echo $customer_item_code;
 // 			//echo $this->db->last_query();
 // 		}
+
+	function GetAll_SPO_of_Supplier($id)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$data = $ci->db->get_where('supplier_po',array('sup_id'=> $id, 'status'=>1))->result_array();
+
+			return $data;
+		}
+		
+	function Get_Bill_data($bid)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$data = $ci->db->get_where('supplier_bill',array('bill_id'=>$bid))->row();
+
+			return $data;
+		}
+
 
 ?>

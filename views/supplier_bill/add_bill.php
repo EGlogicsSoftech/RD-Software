@@ -56,31 +56,58 @@
                                 <div class="box-body ab-class">
                                 
                                     <?php echo form_error('validate'); ?>
-                                    <form action="<?=base_url('grn/saveGrn');?>" enctype="multipart/form-data" method="post">
+                                    <form action="<?=base_url('supplier_bill/saveBill');?>" enctype="multipart/form-data" method="post">
                                     
                                         <?php if( $msg ) { ?>
                                             <div class="col-md-12" style="padding-bottom: 15px;">
                                                 <?php echo $msg; ?>
                                             </div>
-                                        <?php } ?>
+                                        <?php } ?> 
                                         
                                         <div class="form-group col-md-6">
-                                            <label>GRN No. <span style="color:red;">*</span></label>
-                                            <input type="text" class="form-control" name="gn_no" value="<?php echo $this->input->post('gn_no')?>" placeholder="Enter GRN No."/>
-                                            <?php echo form_error('gn_no'); ?>
+                                            <label>Challan No. <span style="color:red;">*</span></label>
+                                            <input type="text" class="form-control" rows="3" name="challan_no" value="<?php echo $this->input->post('challan_no')?>" placeholder="Enter Challan No.">
+                                            <?php echo form_error('challan_no'); ?>
                                         </div>
-                                        
+
                                         <div class="form-group col-md-6">
-                                            <label>Supplier Bills<span style="color:red;">*</span></label>
-                                            <select class="form-control" name="bill_id">
-                                                <option value="">Select Bill</option>
-                                                <?php foreach( $bills as $bill ) : ?>
-                                                    <option <?php if( $this->input->post('bill_id') == $bill['bill_id'] ) { echo "selected"; } ?> value="<?=$bill['bill_id'];?>"><?=$bill['challan_num'];?></option>
+                                            <label>Supplier<span style="color:red;">*</span></label>
+                                            <select class="form-control" name="supplier_id" id="supplier_id">
+                                                <option value="">Select Supplier</option>
+                                                <?php foreach( $suppliers as $supplier ) : ?>
+                                                    <option <?php if( $this->input->post('supplier_id') == $supplier['id'] ) { echo "selected"; } ?> value="<?=$supplier['id'];?>"><?=$supplier['supplier_name'].' - ('.$supplier['supplier_code'].')';?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                             
-                                            <?php echo form_error('bill_id'); ?>
+                                            <?php echo form_error('supplier_id'); ?>
                                         </div>
+                                        
+                                        <div class="form-group col-md-6">
+                                        	<label>Challan Date <span style="color:red;">*</span></label>
+											<div class='input-group date' id='startDate'>
+												<input type='text' class="form-control" name="challan_date" value="<?php echo $this->input->post('challan_date')?>" />
+												<span class="input-group-addon add-on">
+													<span class="glyphicon glyphicon-calendar"></span>
+                                                </span>
+                                            </div>
+                                            <?php echo form_error('challan_date'); ?>
+                                        </div>  
+
+                                        <div class="form-group col-md-6">
+                                            <label>No. of Boxes <span style="color:red;">*</span></label>
+                                            <input type="text" class="form-control" rows="3" name="box_no" value="<?php echo $this->input->post('box_no')?>" placeholder="Enter No. of Boxes">
+                                            <?php echo form_error('box_no'); ?>
+                                        </div>
+                                        
+                                        <div class="form-group col-md-6">
+                                            <label>Add Challan <span style="color:red;">*</span></label>
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="file" name="challan_img" id="challan_img" >
+                                                </label>                                                
+                                            </div>
+                                             <?php echo form_error('challan_img'); ?>
+                                        </div> 
 
                                         <div class="form-group col-md-12">    
                                             <input type="submit" class="btn btn-info" value="Submit">
@@ -108,25 +135,25 @@
         
         <script type="text/javascript">
             
-            $(document).ready(function() {
-                $("#supplier_id").change(function(){
-
-                    var sup_id = $(this).val();
-                    
-                    $.ajax({
-                        url: '/grn/getitem',
-                        data: {'sup_id': sup_id},
-                        type: "post",
-                        success: function(data){
-
-                            $('#supplier_pon').removeAttr('disabled');
-                            $("#supplier_pon").select2("destroy");
-                            $('#supplier_pon').html(data);
-                            $("#supplier_pon").select2();
-                        }
-                    });
-                });
-            });
+           //  $(document).ready(function() {
+//                 $("#supplier_id").change(function(){
+// 
+//                     var sup_id = $(this).val();
+//                     
+//                     $.ajax({
+//                         url: '/grn/getitem',
+//                         data: {'sup_id': sup_id},
+//                         type: "post",
+//                         success: function(data){
+// 
+//                             $('#supplier_pon').removeAttr('disabled');
+//                             $("#supplier_pon").select2("destroy");
+//                             $('#supplier_pon').html(data);
+//                             $("#supplier_pon").select2();
+//                         }
+//                     });
+//                 });
+//             });
 
             $('select').select2();
        

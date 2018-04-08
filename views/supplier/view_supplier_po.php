@@ -40,39 +40,39 @@
                         <li><a href="<?=base_url('admin/dashboard');?>"><i class="fa fa-dashboard"></i> Home</a></li>
                         <li class="active"><?=$title;?></li>
                     </ol>
-                </section> 
+                </section>
 
                 <section class="content">
                     <div class="row">
-                        
+
                         <?php $sup_po_items = GetSupPOItem( $supplier_po->sup_po_id ); ?>
-                        
+
                         <div class="col-md-6">
                         	<div class="box box-warning">
                             	<div class="box-header">
                                     <h3 class="box-title">Supplier Details</h3>
                                     <div class="heading_right_box">
-                                    
+
                                     	<?php if( is_UserAllowed('approve_spo')){ ?>
 											<?php if( $supplier_po->status == 2) : ?>
-												<a style="color:#ff6666;" href="/supplier/approveSPO/<?php echo $supplier_po->id; ?>" id="grn_approv">Click to Approve</a> 
-											<?php else : ?> 
+												<a style="color:#ff6666;" href="/supplier/approveSPO/<?php echo $supplier_po->id; ?>" id="grn_approv">Click to Approve</a>
+											<?php else : ?>
 												<span style="color:green;">Approved</span>
 											<?php endif; ?>
 										<?php } ?>
-										
+
 										<?php if( is_UserAllowed('approve_spo') && $sup_po_items ){ echo "|"; }?>
-                                    	
+
                                     	<?php if( $sup_po_items ) { ?> <a style="color:orange;" href="/supplier/Export_EXCEL/<?php echo $supplier_po->id; ?>">Export Excel</a> | <a style="color:orange;" href="/supplier/Export_PDF/<?php echo $supplier_po->id; ?>">Export PDF</a> <?php } ?>
                                     </div>
                                 </div><!-- /.box-header -->
                                 <div class="box-body table-responsive">
                                     <table id="example2" class="table sv_table_heading table-bordered table-hover">
-                                        <tbody>    
+                                        <tbody>
                                             <tr>
                                                 <th style="width: 25%;">Supplier Name</th>
                                                 <td><?=GetSupplierData( $supplier_po->sup_id )->supplier_name;?></td>
-                                            </tr>   
+                                            </tr>
                                             <tr>
                                                 <th style="width: 25%;">PO#</th>
                                                 <td><?php echo $supplier_po->po_num; ?></td>
@@ -95,13 +95,13 @@
                                                 <th style="width: 25%;">Created At</th>
                                                 <td><?php echo date("j F, Y | H:i:s", strtotime($supplier_po->created_at)); ?></td>
                                             </tr>
-                                            
+
                                         </tbody>
                                     </table>
-                                </div>   
+                                </div>
 							</div>
-						</div>	
-						
+						</div>
+
                     	<div class="col-md-6">
                     		<?php if( is_UserAllowed('add_spo_item')){ ?>
 								<?php if( $supplier_po->status == 2) : ?>
@@ -109,9 +109,9 @@
 										<div class="box-header">
 											<h3 class="box-title">Add Item</h3>
 										</div>
-							
+
 										<div class="box-body">
-								
+
 											<?php echo form_error('validate'); ?>
 											<form enctype="multipart/form-data" action="<?=base_url('supplier/SaveItemToSuplier').'/'.$supplier_po->id; ?>" method="post">
 
@@ -149,27 +149,27 @@
 													<input disabled type="text" class="form-control price" name="prc_epr_untt" value="<?php echo $this->input->post('prc_epr_unt')?>" placeholder="Price Per Unit" />
 													<?php echo form_error('prc_epr_unt'); ?>
 												</div>
-										
+
 												<input type="hidden" class="form-control" name="sup_po_id" value="<?php echo $supplier_po->sup_po_id?>" />
-										
-												<div class="form-group col-md-12">  
-													<input type="hidden" class="form-control price" name="prc_epr_unt" value="<?php echo $this->input->post('prc_epr_unt')?>" placeholder="Price Per Unit" /> 
+
+												<div class="form-group col-md-12">
+													<input type="hidden" class="form-control price" name="prc_epr_unt" value="<?php echo $this->input->post('prc_epr_unt')?>" placeholder="Price Per Unit" />
 													<input type="submit" class="btn btn-info" value="Submit">
 												</div>
 												<div style="clear:both;"></div>
-											</form> 
+											</form>
 										</div>
 									</div>
 									<?php endif; ?>
                         		<?php } ?>
-                        	</div>  
-                        	         
+                        	</div>
+
 						<div class="col-md-12">
-							<div class="box box-warning"> 
+							<div class="box box-warning">
 									<div class="box-header">
 										<h3 class="box-title">Supplier P.O. Items</h3>
 									</div>
-										
+
 									<div class="box-body table-responsive">
 										<?php if( $sup_po_items ) : ?>
 											<table id="example1" class="table sv_table_heading table-bordered table-hover">
@@ -189,11 +189,11 @@
 														<?php endif; ?>
 													</tr>
 												</thead>
-												<tbody>    
-													<?php 	$i=1; 
+												<tbody>
+													<?php 	$i=1;
 															$gross = 0;
-															foreach( $sup_po_items as $sup_po_item ) : 
-											
+															foreach( $sup_po_items as $sup_po_item ) :
+
 															$amount = $sup_po_item['qty'] * $sup_po_item['price'];
 															$gross += $amount;
 															$item_img = GetItemData( $sup_po_item['item_id'] )->ITEM_IMAGE;
@@ -224,22 +224,22 @@
 															<?php }else{ ?>
 																<?php echo $sup_po_item['qty']; ?>
 															<?php } ?>
-															
+
 														</td>
 														<td <?php if( $good_recived < $sup_po_item['qty']) { echo 'class="uninvoiced_column_red"'; } ?> ><?php echo $good_recived; ?></td>
 														<td><?php echo GetItemUnit($itemUnitID); ?></td>
 														<td class="update_price"><?php echo $sup_po_item['price']; ?></td>
 														<td><?php echo $amount; ?></td>
-														
+
 														<?php if( is_UserAllowed('remove_spo_item')){ ?>
 															<?php if( $supplier_po->status == 2) : ?>
 																<td>
 																	<a style="color:red;" class="remove_spo_item" rowid="<?php echo $sup_po_item['id']; ?>" href="#">Remove</a>
 																</td>
                                                     		<?php endif; ?>
-														<?php } ?>	
+														<?php } ?>
 
-													</tr>    
+													</tr>
 													<?php $i++; endforeach; ?>
 												</tbody>
 											</table>
@@ -249,12 +249,12 @@
 												</tbody>
 											</table>
 										<?php else : ?>
-											<h4>No items found!!!</h4>	
+											<h4>No items found!!!</h4>
 										<?php endif; ?>
-									</div>        
+									</div>
 								</div>
-						</div> 
-                    
+						</div>
+
                     </div>   <!-- /.row -->
                 </section><!-- /.content -->
             </aside><!-- /.right-side -->
@@ -279,87 +279,87 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 
         <script type="text/javascript">
-            
+
             $('select').select2();
-            
+
             $(document).ready(function() {
                 $(".supplier_code").change(function(){
 
                     var item_id = $(this).val();
-                    
+
                     $.ajax({
                         url: '/supplier/GetPricebyItemID',
                         data: {'item_id': item_id},
                         type: "post",
                         success: function(data){
-                        	
+
                         	$('.price').val(data);
-                        	
+
                         }
                     });
                 });
             });
-            
+
             $(document).ready(function() {
                 $(".supplier_code").change(function(){
 
                     var item_id = $(this).val();
-                   
+
                    $.ajax({
                         url: '/supplier/getStock',
                         data: {'item_id': item_id},
                         type: "post",
                         success: function(data){
-                        
+
                         	$('.Cstock').val(data);
-                        	
+
                         }
                     });
                 });
             });
-            
+
             $(document).ready(function() {
                 $(".qty_update").click(function(){
 
                     //var price = $(this).attr('price');
                     var row_id = $(this).attr('rowid');
                     var qty = $('.order_qty'+row_id).val();
-                    
+
                    $.ajax({
                         url: '/supplier/updateQTY',
                         data: {'row_id': row_id, 'qty': qty},
                         type: "post",
                         success: function(data){
-                        
+
                         	location.reload();
-                        	
+
                         }
                     });
                 });
-                
+
                 $(".remove_spo_item").click(function(e) {
 					event.preventDefault();
-					
+
 					if(confirm("Do you really want to remove this item?")){
-					
+
 						var rowid = $(this).attr('rowid');
-					
+
 						$.ajax({
 							url: '/supplier/remove_sub_item',
-							data: {'rowid': rowid}, 
+							data: {'rowid': rowid},
 							type: "post",
 							success: function(data){
-								
+
 								location.reload();
-									
+
 							}
 						});
 					}
-                    
+
 				});
-				
+
             });
-            
+
         </script>
 
     </body>

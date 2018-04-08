@@ -22,6 +22,7 @@
 | a PHP script and you can easily do that on your own.
 |
 */
+date_default_timezone_set('Asia/Kolkata');
 $config['base_url'] = "http://".$_SERVER['HTTP_HOST'];
 
 /*

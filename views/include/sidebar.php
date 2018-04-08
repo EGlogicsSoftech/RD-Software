@@ -168,7 +168,30 @@
 					</ul>
 				</li>
 				
-			<?php } if( is_UserAllowed('stock')){ ?>
+			<?php } ?> 
+				
+				<li class="treeview <?php if($this->uri->segment(1)=="grn"){echo "active";}?>">
+					<a href="#">
+						<i class="fa fa-laptop"></i>
+						<span>Supplier Bills</span>
+						<i class="fa fa-angle-left pull-right"></i>
+					</a>
+					<ul class="treeview-menu">
+				
+						<?php //if( is_UserAllowed('add_grn')){ ?>
+							<li class="<?php if($this->uri->segment(2)=="add"){echo "active";}?>">
+								<a href="<?=base_url('supplier_bill/add');?>"><i class="fa fa-angle-double-right"></i> Add Bill</a>
+							</li>
+						<?php //} ?>
+						
+						<?php //if( is_UserAllowed('all_grn')){ ?>
+							<li><a href="<?=base_url('supplier_bill/all_bills');?>"><i class="fa fa-angle-double-right"></i> All Bills</a></li>
+						<?php //} ?>	
+					
+					</ul>
+				</li>
+				
+			<?php if( is_UserAllowed('stock')){ ?>
 			
 				<li class="treeview <?php if($this->uri->segment(1)=="stock"){echo "active";}?>">
 					<a href="#">

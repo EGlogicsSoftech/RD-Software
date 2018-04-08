@@ -45,74 +45,71 @@
                 <section class="content">
                     <div class="row">
                     
-                    	<?php $grnItems = GetGRNItems( $grn->grn_id ); ?>
+                    	<?php $billitems = GetBillItems( $bill->bill_id ); ?>
                     	
                         <div class="col-md-6">
                         	<div class="box box-warning">
                             	<div class="box-header">
-                                    <h3 class="box-title">GRN Details</h3>
+                                    <h3 class="box-title">Bill Details</h3>
                                     <?php //var_dump($grn); ?>
                                     <div class="heading_right_box">
                                     
 										<?php if( is_UserAllowed('approve_grn')){ ?>
-											<?php if( $grn->status == 2) : ?>
-												<a style="color:green;" href="/grn/approve_grn/<?php echo $grn->id; ?>" id="grn_approv">Click to Approve</a> 
+											<?php if( $bill->status == 2) : ?>
+												<a style="color:green;" href="/supplier_bill/approve_bill/<?php echo $bill->id; ?>" id="grn_approv">Click to Approve</a> 
 											<?php else : ?> 
 												<span style="color:green;">Approved</span> 
 											<?php endif; ?>
 										<?php } ?>
 										
-										<?php if( is_UserAllowed('approve_grn') && $grnItems ){ echo "|"; }?>
+										<!-- 
+<?php if( is_UserAllowed('approve_grn') && $billitems ){ echo "|"; }?>
                                     	
-                                    	<?php if( $grnItems ) { ?> <a style="color:orange;" href="/grn/Export_EXCEL/<?php echo $grn->grn_id; ?>">Export Excel</a> | <a style="color:orange;" href="/grn/Export_PDF/<?php echo $grn->grn_id; ?>">Export PDF</a> <?php } ?>
+                                    	<?php if( $billitems ) { ?> <a style="color:orange;" href="/grn/Export_EXCEL/<?php echo $bill->bill_id; ?>">Export Excel</a> | <a style="color:orange;" href="/grn/Export_PDF/<?php echo $grn->grn_id; ?>">Export PDF</a> <?php } ?>
+ -->
                                     </div>
                                 </div>
                             	<div class="box-body table-responsive">
                                     <table id="example2" class="table sv_table_heading table-bordered table-hover">
-                                        <tbody>    
-                                            <tr>
-                                                <th style="width: 25%;">GRN Number</th>
-                                                <td><?php echo $grn->grn_number; ?></td>
-                                            </tr>  
+                                        <tbody>      
                                             <tr>
                                                 <th style="width: 25%;">Supplier Name</th>
-                                                <td><?=GetSupplierData( Get_Bill_data( $grn->bill_id )->sup_id )->supplier_name;?></td>
+                                                <td><?=GetSupplierData( $bill->sup_id )->supplier_name;?></td>
                                             </tr>
                                             <tr>
                                                 <th style="width: 25%;">Challan No.</th>
-                                                <td><?php echo Get_Bill_data( $grn->bill_id )->challan_num; ?></td>
+                                                <td><?php echo $bill->challan_num; ?></td>
                                             </tr>  
                                              <tr>
                                                 <th style="width: 25%;">Challan Date</th>
-                                                <td><?php echo date("j F, Y", strtotime(Get_Bill_data( $grn->bill_id )->challan_date)); ?></td>
+                                                <td><?php echo date("j F, Y", strtotime($bill->challan_date)); ?></td>
                                             </tr>   
                                             <tr>
                                                 <th style="width: 25%;">No. of Boxes</th>
-                                                <td><?php echo Get_Bill_data( $grn->bill_id )->num_of_box; ?></td>
+                                                <td><?php echo $bill->num_of_box; ?></td>
                                             </tr>
                                             <tr>
                                                 <th style="width: 25%;">Challan</th>
                                                 <td>
-                                                	<?php $img = Get_Bill_data( $grn->bill_id )->challan_img; if( $img ): ?>
-														<a target="_blank" href="<?=base_url();?>uploads/grn_images/<?php echo $grn->challan_img; ?>">Download</a>
+                                                	<?php if( $bill->challan_img ): ?>
+														<a target="_blank" href="<?=base_url();?>uploads/grn_images/<?php echo $bill->challan_img; ?>">Download</a>
 													<?php endif; ?>
                                                 </td>
                                             </tr> 
                                             
-                                            <?php if( $grn->status == 1) : ?>
+                                            <?php if( $bill->status == 1) : ?>
 												<tr>
 													<th style="width: 25%;">Approved By</th>
-													<td><?php echo GetUserData(Get_Bill_data( $grn->approved_by) ); ?></td>
+													<td><?php echo GetUserData($bill->approved_by)->name; ?></td>
 												</tr>
 											<?php endif; ?>
                                             <tr>
                                                 <th style="width: 25%;">Created By</th>
-                                                <td><?php echo GetUserData(Get_Bill_data( $grn->created_by) ); ?></td>
+                                                <td><?php echo GetUserData($bill->created_by)->name; ?></td>
                                             </tr>
-
                                             <tr>
                                                 <th style="width: 25%;">Created At</th>
-                                                <td><?php echo date("j F, Y | H:i:s", strtotime($grn->date)); ?></td>
+                                                <td><?php echo date("j F, Y | H:i:s", strtotime($bill->date)); ?></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -122,16 +119,16 @@
 						
 						<div class="col-md-6">
 							<?php if( is_UserAllowed('add_grn_item')){ ?>
-								<?php if( $grn->status == 2) : ?>
+								<?php if( $bill->status == 2) : ?>
 									<div class="box box-warning">
 										<div class="box-header">
-											<h3 class="box-title">Add Item to GRN</h3>
+											<h3 class="box-title">Add Item to Bill</h3>
 										</div>
 							
 										<div class="box-body">
 								
 											<?php echo form_error('validate'); ?>
-											<form enctype="multipart/form-data" action="<?=base_url('grn/saveGrnItem/'.$grn->id); ?>" method="post">
+											<form enctype="multipart/form-data" action="<?=base_url('supplier_bill/saveBillItem/'.$bill->id); ?>" method="post">
 
 												<?php if( $msg ) { ?>
 													<div class="" style="padding-bottom: 15px;">
@@ -140,57 +137,51 @@
 												<?php } ?>
 										
 												<div class="form-group col-md-6">
-													<?php $items = Get_Items_of_bill($grn->bill_id); ?>
-													<label>Items <span style="color:red;">*</span></label>
-													<select class="form-control" name="item_id"  style="width:100%;">
-														<option value="">Select Item</option>
-														<?php foreach( $items as $item ) :  ?>
-															<option value="<?=$item['item_id'];?>"><?=GetItemData( $item['item_id'] )->ITEM_CODE;?></option>
+													<?php $spos = GetAll_SPO_of_Supplier($bill->sup_id); ?>
+													<label>Supplier PO <span style="color:red;">*</span></label>
+													<select class="form-control spo" name="spo"  style="width:100%;">
+														<option value="">Select SPO</option>
+														<?php foreach( $spos as $spo ) : ?>
+															<option value="<?=$spo['sup_po_id'];?>"><?=$spo['po_num'];?></option>
 														<?php endforeach; ?>
 													</select>
+													<?php echo form_error('spo'); ?>
+												</div> 
+												
+												<div class="form-group col-md-6">
+													<label>Items <span style="color:red;">*</span></label>
+													<select class="form-control item_id" name="item_id"  style="width:100%;">
+														<option value="">Select Item</option>
+													</select>
 													<?php echo form_error('item_id'); ?>
+												</div> 
+												
+												<div class="form-group col-md-6">
+													<label>Price <span style="color:red;">*</span></label>
+													<input readonly type="text" class="form-control price" name="price" value=""/>
+													<?php echo form_error('price'); ?>
 												</div>
 
 												<div class="form-group col-md-6">
 													<label>Challan Qty <span style="color:red;">*</span></label>
-													<input type="text" class="form-control challan_qty" name="challan_qty" value=""/>
+													<input type="text" class="form-control challan_qty" onfocusout="Get_total()" name="challan_qty" value=""/>
 													<?php echo form_error('challan_qty'); ?>
 												</div>
 
 												<div class="form-group col-md-6">
-													<label>Received Qty <span style="color:red;">*</span></label>
-													<input type="text" class="form-control received_qty" value="" name="received_qty" />
-													<?php echo form_error('received_qty'); ?>
+													<label>Total <span style="color:red;">*</span></label>
+													<input readonly type="text" class="form-control total" value="" name="total" />
+													<?php echo form_error('total'); ?>
 												</div>
 
 												<div class="form-group col-md-6">
-													<label>Accepted Qty <span style="color:red;">*</span></label>
-													<input type="text" class="form-control accepted_qty" onfocusout="rejectedQTY()" name="accepted_qty" value=""/>
-													<?php echo form_error('accepted_qty'); ?>
+													<label>Total GST <span style="color:red;">*</span></label>
+													<input type="text" class="form-control" name="total_gst" value=""/>
+													<?php echo form_error('total_gst'); ?>
 												</div>
-												
-												<div class="form-group col-md-6">
-													<label>Diffrence</label>
-													<input type="text" disabled class="form-control diffrence_qty" name="diffrence_qty" value=""/>
-													<?php echo form_error('diffrence_qty'); ?>
-												</div>
-										
-												<div class="form-group col-md-6">
-													<label>Rejected Qty</label>
-													<input type="text" disabled class="form-control rejected_qty" name="rejected_qty" value=""/>
-													<?php echo form_error('rejected_qty'); ?>
-												</div>
-										
-												<div class="form-group col-md-12">
-													<label>Remarks</label>
-													<textarea class="form-control" name="remarks" placeholder="Remarks Against Rejection"></textarea>
-													<?php echo form_error('remarks'); ?>
-												</div>
-										
-												<input type="hidden" class="form-control" name="grn_id" value="<?php echo $grn->grn_id?>" />
 										
 												<div class="form-group col-md-12">    
-													<!-- <input type="hidden" class="max_recived_qty" name="max_recived_qty" value="" /> -->
+													<input type="hidden" class="form-control" name="bill_id" value="<?php echo $bill->bill_id?>" />
 													<input type="submit" class="btn btn-info" value="Submit">
 												</div>
 												<div style="clear:both;"></div>
@@ -208,7 +199,7 @@
 								</div>
 								
 								<div class="box-body table-responsive">
-									<?php if( $grnItems ) : ?>
+									<?php if( $billitems ) : ?>
 										<table id="example1" class="table sv_table_heading table-bordered table-hover">
 											<thead>
 												<tr>
@@ -217,8 +208,9 @@
 													<th>Item Description</th>
 													<th>Unit</th>
 													<th>Challan Qty</th>
-													<th>Recieved Qty</th>
-													<th>Accepted Qty</th>
+													<th>GST</th>
+													<!-- 
+<th>Accepted Qty</th>
 													<th>Rejected Qty</th>
 													<th>Diffrence Qty</th>
 													<th>Stocked Qty</th>
@@ -228,22 +220,25 @@
 															<th>Status</th>
 														<?php endif; ?>	
 													<?php } ?>
+ -->
 												</tr>
 											</thead>
 											<tbody>    
 												<?php 	$i=1; 
-														foreach( $grnItems as $grnItem ) : 
+														foreach( $billitems as $billitems ) : 
 														
-														$GRNtoSTOCK = GRNtoSTOCK($grnItem['grn_row_id'], $grnItem['item_id']);
+														//$GRNtoSTOCK = GRNtoSTOCK($grnItem['grn_row_id'], $grnItem['item_id']);
 												?>
 												<tr>
 													<td><?=$i;?></td>
-													<td><?php echo GetItemData( $grnItem['item_id'] )->ITEM_CODE; ?></td>
-													<td><?php echo GetItemData( $grnItem['item_id'] )->ITEM_DESC; ?></td>
-													<td><?php echo GetItemUnit( GetItemData( $grnItem['item_id'] )->ITEM_UNIT); ?></td>
-													<td><?php echo $grnItem['challan_qty']; ?></td>
-													<td><?php echo $grnItem['received_qty']; ?></td>
-													<td><?php echo $grnItem['accepted_qty']; ?></td>
+													<td><?php echo GetItemData( $billitems['item_id'] )->ITEM_CODE; ?></td>
+													<td><?php echo GetItemData( $billitems['item_id'] )->ITEM_DESC; ?></td>
+													<td><?php echo GetItemUnit( GetItemData( $billitems['item_id'] )->ITEM_UNIT); ?></td>
+													<td><?php echo $billitems['challan_qty']; ?></td>
+													<td><?php echo $billitems['gst']; ?></td>
+													
+													<!-- 
+<td><?php echo $grnItem['accepted_qty']; ?></td>
 													<td><?php echo $grnItem['received_qty'] - $grnItem['accepted_qty']; ?></td>
 													<td><?php echo $grnItem['received_qty'] - $grnItem['challan_qty']; ?></td>
 													<td <?php if( $grnItem['accepted_qty'] > $GRNtoSTOCK ) { echo 'class="uninvoiced_column_red"'; } ?> ><?php echo $GRNtoSTOCK; ?></td>
@@ -263,6 +258,7 @@
 														</td>
 														<?php endif; ?>
 													<?php } ?>
+ -->
 												</tr>    
 												<?php $i++; endforeach; ?>
 											</tbody>
@@ -300,6 +296,43 @@
 
         <script type="text/javascript">
         
+        	$(document).ready(function() {
+                $(".spo").change(function(){
+
+                    var sup_po_id = $(this).val();
+                    
+                    $.ajax({
+                        url: '/supplier_bill/getitem',
+                        data: {'sup_po_id': sup_po_id},
+                        type: "post",
+                        success: function(data){
+
+                            $('.item_id').removeAttr('disabled');
+                            $(".item_id").select2("destroy");
+                            $('.item_id').html(data);
+                            $(".item_id").select2();
+                        }
+                    });
+                });
+                
+                $(".item_id").change(function(){
+
+                    var item_id = $(this).val();
+                   	var spo_id = $('.spo').val();
+                    
+                    $.ajax({
+                        url: '/supplier_bill/get_SPO_item_price',
+                        data: {'item_id': item_id, 'spo_id': spo_id},
+                        type: "post",
+                        success: function(data){
+							
+                           $('.price').val(data);
+                           
+                        }
+                    });
+                });
+            });
+        
         	// function maxQTY()
 //         		{
 //         			var received_qty = $('.received_qty').val();
@@ -308,32 +341,16 @@
 //         			$('.max_recived_qty').val(received_qty);
 //         		}
 
-        	function rejectedQTY()
+        	function Get_total()
         		{
         			var challan_qty = parseFloat ( $('.challan_qty').val() );
-        			var received_qty = parseFloat ( $('.received_qty').val() ); 
-        			var accepted_qty = parseFloat ( $('.accepted_qty').val() );
+        			var price = parseFloat ( $('.price').val() ); 
         			
-        			var diff = received_qty - challan_qty;
+        			var total = challan_qty * price;
         			
-        			if(diff)
+        			if(total)
         				{
-        					$('.diffrence_qty').val(diff);
-        				}
-
-        			if(accepted_qty < received_qty)
-        				{	
-        					var rejected_qty = received_qty - accepted_qty;
-
-        				}
-        			else
-        				{
-        					var rejected_qty = '0';
-        				}
-        			
-        			if(rejected_qty)
-        				{
-        					$('.rejected_qty').val(rejected_qty);
+        					$('.total').val(total);
         				}
         		}
             

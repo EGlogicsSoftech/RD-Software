@@ -495,6 +495,18 @@ function saveGrn($GrnData)
 		return false;
 		}
 	}
+	
+function saveBill($data)
+	{
+	if($this->db->insert('supplier_bill', $data)){
+		$id = $this->db->insert_id();
+		return $id;
+		}
+		else
+		{
+		return false;
+		}
+	}
 
 function hasSameItemCode($code, $id)
 	{
@@ -530,6 +542,19 @@ function SaveGrnItem($GrnItemData)
 		return false;
 		}
 	}
+	
+function SaveBillItem($data)
+	{
+	if($this->db->insert('bill_item', $data)){
+		$id = $this->db->insert_id();
+		return $id;
+		}
+		else
+		{
+		return false;
+		}
+	}
+
 
 function UpdateGrnItem($id, $GrnItemData)
 	{
@@ -954,6 +979,19 @@ function ApproveGRN($gid, $uid)
 
 		if($this->db->update('grn', array('status'=> 1, 'approved_by'=> $uid))){
 		return $gid;
+		}
+		else
+		{
+		return false;
+		}
+	}
+	
+function ApproveBILL($bid, $uid)
+	{
+		$this->db->where('id', $bid);
+
+		if($this->db->update('supplier_bill', array('status'=> 1, 'approved_by'=> $uid))){
+		return $bid;
 		}
 		else
 		{

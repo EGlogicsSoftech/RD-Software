@@ -49,9 +49,9 @@ $active_group = 'default';
 $active_record = TRUE;
 
 $db['default']['hostname'] = 'localhost';
-$db['default']['username'] = 'root';
-$db['default']['password'] = 'DBGHJSEy3J2do';
-$db['default']['database'] = 'rd_ims';
+$db['default']['username'] = 'demotakg_ims';
+$db['default']['password'] = 'Test@1234';
+$db['default']['database'] = 'demotakg_ims';
 $db['default']['dbdriver'] = 'mysqli';
 $db['default']['dbprefix'] = '';
 $db['default']['pconnect'] = TRUE;

@@ -262,6 +262,7 @@ class Item extends CI_Controller {
 					}
 				
 				$sup_id = @$this->input->post('supplier');
+				$INNER_BOX_QTY = $this->input->post('outer_qty');
 				
 				$ItemData = array(
 					'ITEM_ID' => time(),
@@ -273,9 +274,9 @@ class Item extends CI_Controller {
 					'SUPPLIER_ID' => implode(',', $sup_id),
 					'ITEM_UNIT' => @$this->input->post('item_unit'),
 					'INNER_BOX' => @$this->input->post('inner_box'),
-					'INNER_BOX_QTY' => (empty(@$this->input->post('inner_qty')) ? null : @$this->input->post('inner_qty')),
+					'INNER_BOX_QTY' => $INNER_BOX_QTY,
 					'OUTER_BOX' => @$this->input->post('outer_box'),
-					'OUTER_BOX_QTY' => (empty(@$this->input->post('outer_qty')) ? null : @$this->input->post('outer_qty')),
+					'OUTER_BOX_QTY' => @$this->input->post('outer_qty'),
 					'PURCHASE_PRICE' => @$this->input->post('purchase_price'),
 					'PURCHASE_PRICE_CODE' => @$this->input->post('purchase_price_code'),
 					'HSN_CODE' => @$this->input->post('hsn_code'),
@@ -502,9 +503,11 @@ class Item extends CI_Controller {
 					'SUPPLIER_ID' => implode(',', $sup_id),
 					'ITEM_UNIT' => @$this->input->post('item_unit'),
 					'INNER_BOX' => @$this->input->post('inner_box'),
-					'INNER_BOX_QTY' => (empty(@$this->input->post('inner_qty')) ? null : @$this->input->post('inner_qty')),
+					//'INNER_BOX_QTY' => (empty(@$this->input->post('inner_qty')) ? null : "@$this->input->post('inner_qty')"),
+					'INNER_BOX_QTY' => @$this->input->post('inner_qty'),
 					'OUTER_BOX' => @$this->input->post('outer_box'),
-					'OUTER_BOX_QTY' => (empty(@$this->input->post('outer_qty')) ? null : @$this->input->post('outer_qty')),
+					//'OUTER_BOX_QTY' => (empty(@$this->input->post('outer_qty')) ? null : "@$this->input->post('outer_qty')"),
+					'OUTER_BOX_QTY' => @$this->input->post('outer_qty'),
 					'PURCHASE_PRICE' => @$this->input->post('purchase_price'),
 					'PURCHASE_PRICE_CODE' => @$this->input->post('purchase_price_code'),
 					'HSN_CODE' => @$this->input->post('hsn_code'),
