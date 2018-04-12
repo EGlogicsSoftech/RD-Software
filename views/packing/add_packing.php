@@ -64,23 +64,25 @@
                                             </div>
                                         <?php } ?>
                                         
-                                        <?php $array1 = array();	$array2 = array();
-                                        
-                                        		if( $PN_from_Packing ) :
-													foreach($PN_from_Packing as $row1)
-														{
-															$array1[] = $row1['packing_num'];
-														}
+                                        <?php 	if( $PN_from_Packing ) :
+                                        			
+                                        			// All Packing Number From Packing List
+                                        			$packing_num = array_map (function($value){
+														return $value['packing_num'];
+													} , $PN_from_Packing);
+													
 												endif;	
 												
 												if($packing_nos) :
-													foreach($packing_nos as $row2)
-														{
-															$array2[] = $row2['ref_id'];
-														}
+													
+													// All Ref ID From Stock Issue
+													$ref_id = array_map (function($value){
+														return $value['ref_id'];
+													} , $packing_nos);
+													
 												endif;
 												
-												$results = array_diff($array2, $array1);
+												$results = array_diff($packing_nos, $packing_num);
 													 
                                        	?>
                                         

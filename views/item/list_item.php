@@ -1,3 +1,4 @@
+
 <?php 	$this->load->helper('item'); ?>
 <!DOCTYPE html>
 <html>
@@ -32,7 +33,7 @@
             <?php $this->load->view('include/sidebar');?>
 
             <!-- Right side column. Contains the navbar and content of the page -->
-            <aside class="right-side">            
+            <aside class="right-side">
                 <!-- Content Header (Page header) -->
                 <section class="content-header">
                     <h1><?=$title;?></h1>
@@ -47,37 +48,74 @@
                     <div class="row">
                         <div class="col-xs-12">
                             <div class="box">
-                                <div class="box-header">
-                                    <h3 class="box-title"><?=$title;?></h3>                                    
-                                </div><!-- /.box-header -->
-                                
-                                <!-- 
-<div class="box-body">
-                                	<div class="row">
-										<form action="#" method="POST">
-											
-											<div class="col-xs-3">
-												<select class="form-control sv_cateogry" name="cateogry">
-													<option value="">Select Category</option>
-										
-													<?php foreach( $categories as $category ) : ?>
-														<option <?php if( $this->input->post('cateogry') == $category['ID'] ){ echo "selected"; } ?> value="<?=$category['ID'];?>"><?=$category['CATEGORY_NAME'];?></option>
-													<?php endforeach; ?> 
-										
-												</select> 
-											</div>
-											
-											<div class="col-xs-3">
-												 <input type="submit" class="btn btn-info" name="submit" value="Submit">
-											</div>
-											
-										</form>
-									</div>
-                                </div>
- -->
-                                
+                                <!--<div class="box-header">
+                                    <h3 class="box-title"><?=$title;?></h3>
+                                </div> --><!-- /.box-header -->
+
+
+                                  <div class="box-body" style="padding:20px;margin-bottom:20px;background: #fff;">
+
+                                    <div class="box-header">
+                                        <h3 style="margin-top:0px;">FILTER</h3>
+                                    </div>
+
+                                    <div class="row">
+                    										<form action="#" method="POST">
+
+                                          <div class="col-xs-3">
+                                            <select id="sv_items" class="item-ajax form-control sv_item" name="item[]" multiple></select> OR
+                                          </div>
+
+                    											<div class="col-xs-3">
+                    												<select class="form-control category_select" name="category" style="width: 80%;float: right;">
+                    													<option value="">Select Category</option>
+
+                    													<?php foreach( $categories as $category ) : ?>
+                    														<option <?php if( $this->input->post('category_select') == $category['ID'] ){ echo "selected"; } ?> value="<?=$category['ID'];?>"><?=$category['CATEGORY_NAME'];?></option>
+                    													<?php endforeach; ?>
+
+                                            </select> OR
+
+                    											</div>
+
+                                          <div class="col-xs-3">
+
+                                          <select class="form-control supplier_select" name="supplier[]" multiple="multiple">
+                                              <option value="">Select Supplier</option>
+                                              <?php
+                                                    $suppliers = GetAllSupplier();
+                                                    foreach( $suppliers as $supplier ) : ?>
+                                                    <option <?php if( $this->input->post('supplier_select') == $supplier['id'] ){ echo "selected"; } ?> value="<?=$supplier['id'];?>"><?=$supplier['supplier_name'].' - ('.$supplier['supplier_code'].')';?></option>
+
+                                              <?php
+                                                    endforeach;
+                                              ?>
+                                          </select>
+
+                                          </div>
+
+                                          <div class="col-xs-3">
+                                            <select class="form-control country_select" name="item_country">
+                                                <option value="">Select Country</option>
+                                                <?php
+                                                    $countries = $this->db->get_where('item_country')->result_array();
+                                                    foreach( $countries as $country ) : ?>
+                                                    <option <?php if( $this->input->post('item_country') == $country['id'] ){ echo "selected"; } ?> value="<?=$country['id'];?>"><?=$country['country_name'];?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                          </div>
+
+                    											<div class="col-xs-3">
+                    												 <input type="submit" class="btn btn-info" name="submit" value="Filter">
+                    											</div>
+
+                    										</form>
+									                   </div>
+                                   </div>
+
+
                                 <div class="box-body table-responsive">
-                                	
+
 									<table id="example1" class="table table-bordered table-hover">
                                         <thead>
                                             <tr>
@@ -90,20 +128,20 @@
                                                 <th>Supplier</th>
                                                 <!-- <th>Net Weight</th> -->
                                                 <th>Item Unit</th>
-                                                <!-- 
+                                                <!--
 <th>Inner Box Size</th>
                                                 <th>Outer Box Size</th>
  -->
                                                	<th>Stock Quantity</th>
-                                                <!-- 
+                                                <!--
 <th>Purchase Price</th>
                                                 <th>Assembled</th>
  -->
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody> 
-                                           
+                                        <tbody>
+
                                         </tbody>
                                         <tfoot>
                                             <tr>
@@ -116,12 +154,12 @@
                                                 <th>Supplier</th>
                                                 <!-- <th>Net Weight</th> -->
                                                 <th>Item Unit</th>
-                                                <!-- 
+                                                <!--
 <th>Inner Box Size</th>
                                                 <th>Outer Box Size</th>
  -->
                                                	<th>Stock Quantity</th>
-                                                <!-- 
+                                                <!--
 <th>Purchase Price</th>
                                                 <th>Assembled</th>
  -->
@@ -131,7 +169,7 @@
                                     </table>
                                 </div><!-- /.box-body -->
                             </div><!-- /.box -->
-                            
+
                         </div>
                     </div>
 
@@ -148,25 +186,78 @@
         <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
         <!-- AdminLTE App -->
         <script src="<?=base_url();?>admin/js/AdminLTE/app.js" type="text/javascript"></script>
-
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
         <!-- page script -->
         <script type="text/javascript">
-            $(document).ready(function() {
-            	var dataTable = $('#example1').DataTable({
+            $(document).ready(function()
+            {
+                $(".category_select").select2(
+                  {
+                    placeholder: 'Search by category(s)',
+                    minimumInputLength: 0,
+                    allowClear: true
+                  }
+                );
+
+                $(".supplier_select").select2(
+                  {
+                    placeholder: 'Search by supplier(s)',
+                    minimumInputLength: 0,
+
+                  }
+                );
+
+                $(".country_select").select2(
+                  {
+                    placeholder: 'Search by country(s)',
+                    minimumInputLength: 0,
+                     allowClear: true
+                  }
+                );
+
+                // DATA TABLE
+                <?php if(isset($_POST))
+                  {
+                    $data = json_encode($_POST);
+                  }
+                ?>
+                var dataTable = $('#example1').DataTable({
             		"processing": true,
-					"serverSide": true,
-					"order":[],
-					"ajax":{  
-						url: "<?php echo base_url('item/fetch_items') ?>",  
-						type: "POST"  
-				   	},
-				   	"columnDefs": [
-						{ 
-							"targets": [ 0 ], //first column / numbering column
-							"orderable": false, //set not orderable
-						},
-					], 
-				});
+      					"serverSide": true,
+      					"order":[],
+      					"ajax":{url: "<?php echo base_url('item/fetch_items') ?>",type: "POST",dataType:"json",  "data": <?php echo $data; ?> },
+
+      				});
+
+              // ITEM DROP DOWN
+              $(".item-ajax").select2({
+
+                ajax: {
+
+                        delay: 250,
+                        dataType: 'json',
+                        url: '<?php echo base_url('item/itemJson'); ?>',
+                        data: function (params) {
+                          var queryParameters = {
+                            q: params.term
+                          }
+
+                          return queryParameters;
+                        },
+                        processResults: function (data) {
+                          return {
+                            results: data.result
+                          };
+                        },
+
+                      },
+                      placeholder: 'Search for item(s)',
+                      minimumInputLength: 1,
+            });
+
+
+
             });
         </script>
     </body>

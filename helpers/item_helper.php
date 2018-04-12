@@ -407,7 +407,7 @@
 
 			return $items;
 		}
-	
+
 	// LIST OF ITEMS OF SUPPLIER BILL
 	function Get_Items_of_bill($bid)
 		{
@@ -438,7 +438,7 @@
 
 			return $data;
 		}
-		
+
 	function GetBillItems($id)
 		{
 			$ci =& get_instance();
@@ -508,7 +508,7 @@
 
 			return $Suppliers;
 		}
-		
+
 	function GetAllBills()
 		{
 			$ci =& get_instance();
@@ -568,7 +568,7 @@
 
 			return $grns;
 		}
-		
+
 	function GetBills()
 		{
 			$ci =& get_instance();
@@ -698,23 +698,66 @@
 
   // GET Uninvoiced Ordered Quanity of any item in all CPI
  function GetOrderInHand($item_id)
- {
-	 	 $ci =& get_instance();
+	 {
+			 $ci =& get_instance();
+			 $ci->load->database();
+			 // Select all CPI with this item
+			 $approved_cpi_array = Get_Approved_CPI();
+
+			 $approved_cpi = implode(", ",$approved_cpi_array);
+
+			 // Select all CPI with this item
+			 $all_cpi = $ci->db->query("select * FROM customer_pi_item WHERE item_id = $item_id AND cust_pi_id IN ($approved_cpi)");
+			 $total = 0;
+			 foreach ($all_cpi->result() as $cpi)
+			 {
+					 $CPI_ID = $cpi->cust_pi_id;
+					 $orderd = $cpi->qty;
+					 $invoiced = invoiced_quantity($CPI_ID, $item_id); // Find total of invoiced qty
+					 $total += $orderd - $invoiced; // Add all the reamining order qty
+			 }
+
+			 return $total;
+
+	 }
+
+ // GET Total Order Quantity of an Item
+ function Get_Total_Order($item_id)
+	 {
+		 $ci =& get_instance();
 		 $ci->load->database();
+
+		 $approved_cpi_array = Get_Approved_CPI();
+
+		 $approved_cpi = implode(", ",$approved_cpi_array);
+
 		 // Select all CPI with this item
-		 $all_cpi = $ci->db->query("select * FROM customer_pi_item WHERE item_id = $item_id");
+		 $all_cpi = $ci->db->query("select * FROM customer_pi_item WHERE item_id = $item_id AND cust_pi_id IN ($approved_cpi)");
 		 $total = 0;
 		 foreach ($all_cpi->result() as $cpi)
 		 {
-			 	 $CPI_ID = $cpi->cust_pi_id;
+				 $CPI_ID = $cpi->cust_pi_id;
 				 $orderd = $cpi->qty;
-				 $invoiced = invoiced_quantity($CPI_ID, $item_id); // Find total of invoiced qty
-				 $total += $orderd - $invoiced; // Add all the reamining order qty
+				 $total += $orderd;
 		 }
 
 		 return $total;
 
- }
+	 }
+
+ 	function Get_Approved_CPI()
+ 		{
+ 			$ci =& get_instance();
+		 	$ci->load->database();
+
+		 	$data = $ci->db->get_where('customer_pi', array('status'=>1))->result_array();
+
+		 	$array = array_map (function($value){
+                return $value['cust_pi_id'];
+            } , $data);
+
+		 	return $array;
+ 		}
 
 	// Get Total Invoiced Quanity of an item in a CPI
 	function invoiced_quantity($CPI_id, $item_id)
@@ -753,8 +796,12 @@
 
 		$ci =& get_instance();
 		$ci->load->database();
+
+		$approved_spo_array = Get_Approved_SPO();
+		$approved_spo = implode(", ",$approved_spo_array);
+
 		// Select all CPI with this item
-		$all_spo = $ci->db->query("select * FROM supplier_po_item WHERE item_id = $item_id");
+		$all_spo = $ci->db->query("select * FROM supplier_po_item WHERE item_id = $item_id AND sup_po_id IN ($approved_spo)");
 		$total_pending = 0;
 		foreach ($all_spo->result() as $spo)
 		{
@@ -768,19 +815,55 @@
 
 	}
 
+	// Get Total qty of Approved SPO
+  function Get_Total_SPO_QTY($item_id)
+	{
+
+		$ci =& get_instance();
+		$ci->load->database();
+
+		$approved_spo_array = Get_Approved_SPO();
+		$approved_spo = implode(", ",$approved_spo_array);
+
+		// Select all CPI with this item
+		$all_spo = $ci->db->query("select * FROM supplier_po_item WHERE item_id = $item_id AND sup_po_id IN ($approved_spo)");
+		$total = 0;
+		$total_pending = 0;
+		foreach ($all_spo->result() as $spo)
+		{
+				$SPO_ID = $spo->sup_po_id;
+				$orderd = $spo->qty;
+				$total += $orderd; // Add all the pending order qty
+		}
+
+		return $total;
+
+	}
+
+	function Get_Approved_SPO()
+ 		{
+ 			$ci =& get_instance();
+		 	$ci->load->database();
+
+		 	$data = $ci->db->get_where('supplier_po', array('status'=>1))->result_array();
+
+		 	$array = array_map (function($value){
+                return $value['sup_po_id'];
+            } , $data);
+
+		 	return $array;
+ 		}
+
 	// Get Received QTY of an item in a SPO
 	function GoodsRecived($SPO_id, $item_id)
 		{
 			$ci =& get_instance();
 		    $ci->load->database();
 
-			$ci->db->select_sum('accepted_qty');
-			$ci->db->from('grn_item');
-			$ci->db->join('grn', 'grn.grn_id = grn_item.grn_row_id');
-			$ci->db->where(array('item_id'=> $item_id, 'sup_po_num'=> $SPO_id, 'status'=>1));
-			$query = $ci->db->get();
-			$qty = $query->row('accepted_qty');
-			return $qty;
+			$query = $ci->db->query('select B.qty from ( select grn_id from grn where status=1 ) AS A RIGHT JOIN ( select SUM(accepted_qty) as qty, grn_row_id from grn_item where supplier_po_id ='.$SPO_id.' AND item_id='.$item_id.' GROUP BY item_id) as B ON A.grn_id = B.grn_row_id');
+			$data = $query->row();
+
+			return $data->qty;
 		}
 
 	function CheckStock()
@@ -965,36 +1048,36 @@
 
 			return $query;
 		}
-		
+
 	function Purchased_Itemqty_of_Origin( $item_id )
 		{
 			$ci =& get_instance();
 		    $ci->load->database();
-				
+
 			//$query = $ci->db->select_sum('qty')->get_where('supplier_po_item',array( 'item_id'=> $item_id ))->row('qty');
 			$query = $ci->db->query("SELECT SUM(qty) as sum FROM `supplier_po` as A,`supplier_po_item` as B WHERE A.sup_po_id = B.sup_po_id AND A.status = 1 AND B.item_id = $item_id")->result();
-			
+
 			return $query[0]->sum;
 		}
-		
+
 	function Purchased_Items_by_customer( $cid )
 		{
 			$ci =& get_instance();
 		    $ci->load->database();
-				
+
 			$query = $ci->db->query("SELECT item_id , SUM(qty) as qty FROM customer_pi as A , customer_pi_item as B WHERE A.cust_id=$cid AND A.cust_pi_id = B.cust_pi_id AND A.status = 1 GROUP BY B.item_id")->result_array();
-			
+
 			return $query;
 		}
-		
+
 	// function getPreviousCPIdata($cid, $item_id)
 // 		{
 // 			//$cid= $_POST['cust_id'];
 // 			//$item_id= $_POST['item_id'];
-// 
+//
 // 			// FIND ALL PI for this customer i.e. $cust_id order by lastest CPI
 // 			$cpi_list = $this->db->order_by('id', 'desc')->get_where('customer_pi',array('cust_id' => $cid))->result_array();
-// 
+//
 // 			//$data = array('customer_item_code'=>'');
 // 			// $item_unit_id = GetItemData($item_id)->ITEM_UNIT;
 // // 			$data['desc'] =  GetItemData($item_id)->ITEM_DESC;
@@ -1004,7 +1087,7 @@
 // 			{
 // 				// FIND This item i.e. $item_id in each CPI , IF Item is found , record the data and break the loop
 // 				$cpi_item_data = $this->db->get_where('customer_pi_item',array('cust_pi_id'=> $cpi['cust_pi_id'], 'item_id' => $item_id))->result_array();
-// 				
+//
 // 				if($cpi_item_data)
 // 					{
 // 						$customer_item_code = $cpi_item_data[0]['customer_item_code'];
@@ -1030,7 +1113,7 @@
 
 			return $data;
 		}
-		
+
 	function Get_Bill_data($bid)
 		{
 			$ci =& get_instance();
@@ -1040,6 +1123,138 @@
 
 			return $data;
 		}
+
+	function Get_debit_data($grn_id, $item_id, $spo)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$query = $ci->db->query('select * from grn_item where item_id = '.$item_id.' AND supplier_po_id = '.$spo.' AND grn_row_id = '.$grn_id);
+			$data = $query->row();
+
+			return $data;
+		}
+
+	function Get_Supplier_Data_by_Array_ID($id)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$query = $ci->db->query('SELECT * FROM supplier WHERE `id` IN ('.$id.')');
+
+			$data = $query->result_array();
+
+			return $data;
+
+		}
+		
+	function Get_All_Bill_by_Supplier_ID($sid)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$data = $ci->db->get_where('supplier_bill',array('sup_id'=>$sid, 'status'=>1))->result_array();
+
+			return $data;
+
+		}
+	
+	// GET TOTAL GST OF BILL	
+	function Get_Total_GST_of_BILL($bid)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$query = $ci->db->query('SELECT SUM(gst) as gst FROM bill_item WHERE bill_id = '.$bid.' group by bill_id');
+			$data = $query->row();
+			
+			return $data->gst;
+
+		}
+		
+	// GET TOTAL AMOUNT OF BILL 
+	function Get_Total_Amount_of_BILL($bid)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+
+			$items = $ci->db->get_where('bill_item',array('bill_id'=>$bid))->result_array();
+			$total = 0;
+			
+			foreach($items as $item)
+				{
+					$item_price = GetItemData($item['item_id'])->PURCHASE_PRICE;
+					$total_amount = $item_price * $item['challan_qty'];
+					$total += $total_amount;
+				}
+			
+			return $total;
+
+		}
+		
+	// GET TOTAL AMOUNT OF BILL 
+	function Get_Total_of_Return_GST($bid)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+		    
+			$grn_row_id = $ci->db->get_where('grn',array('bill_id'=>$bid, 'status'=>1))->row('grn_id');
+			
+			$items = $ci->db->get_where('bill_item',array('bill_id'=>$bid))->result_array();
+			
+			$total = 0;
+			$return_price = 0;
+			$return_gst = 0;
+			
+			foreach($items as $item)
+				{
+					$price = $ci->db->get_where('supplier_po_item',array('sup_po_id'=>$item['supplier_po_id'], 'item_id'=>$item['item_id']))->row('price'); 
+														
+					$sv_data = Get_debit_data($grn_row_id, $item['item_id'], $item['supplier_po_id']);
+														
+					if( $sv_data )
+						{
+							$accepted_qty = $sv_data->accepted_qty;
+						}
+					
+					$qty = $item['challan_qty'] - $accepted_qty;
+					
+					$total_amount = $price * $item['challan_qty'];
+					
+					$return_price += $price * $qty;
+					
+					$return_gst += ($item['gst']/$item['challan_qty'])*$qty;
+				
+					$total += $total_amount;
+				}
+				
+			$data['price'] = $return_price;
+			$data['gst'] = $return_gst;
+			$data['total'] = $total;
+			
+			return $data;
+
+		}
+		
+	function Get_shipped_qty_of_Customer($cid, $iid)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+		    
+			$packings = $ci->db->get_where('packing_list',array('cust_id'=>$cid, 'status'=>1))->result_array();
+			
+			$packing_ids = array_map (function($value){
+                return $value['packing_id'];
+            } , $packings);
+			
+			// $total_qty = 0;
+// 				
+// 			$query = $ci->db->query('SELECT SUM(qty) as qty FROM `packing_list_item` WHERE packing_id IN '.$packing_ids.' AND item_id = '.$iid.' group by item_id');
+// 			$data = $query->row();
+// 			
+			return $packing_ids;
+			
+		}	
 
 
 ?>

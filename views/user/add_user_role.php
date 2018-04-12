@@ -135,6 +135,22 @@
 													</ul>
 												</li>
 												<li class="list-group-item">
+													<input type="checkbox" name="permission[]" value="supplier_bill"> <label>Supplier Bill</label><br> 
+													<ul class="list-group">
+                                            			<li class="list-group-item">
+															<input type="checkbox" name="permission[]" value="add_bill"> Add Bill<br>
+                                                            <input type="checkbox" name="permission[]" value="all_bill"> All Bill<br>
+                                                            <input type="checkbox" name="permission[]" value="approve_bill"> Approve Bill<br>
+
+															<input type="checkbox" name="permission[]" value="debit_note"> Debit Note<br>
+
+															<input type="checkbox" name="permission[]" value="add_bill_item"> Add Bill Item<br>
+															<input type="checkbox" name="permission[]" value="remove_bill_item"> Remove Bill Item <br>
+															<input type="checkbox" name="permission[]" value="update_bill_item"> Update Bill Item<br>
+														</li>
+													</ul>
+												</li>
+												<li class="list-group-item">
 													<input type="checkbox" name="permission[]" value="stock"> <label>Stock</label><br> 
 													<ul class="list-group">
                                             			<li class="list-group-item">
@@ -190,6 +206,8 @@
                                                             <input type="checkbox" name="permission[]" value="rep_supplier"> Supplier<br>
                                                             <input type="checkbox" name="permission[]" value="rep_statistical_raw"> Statistical Data ( Raw )<br>
 															<input type="checkbox" name="permission[]" value="rep_statistical_finished"> Statistical Data ( Finished )<br>
+															<input type="checkbox" name="permission[]" value="rep_item_pending"> Item Pending<br>
+															<input type="checkbox" name="permission[]" value="rep_gst"> GST<br>
 														</li>
 													</ul>
 												</li>

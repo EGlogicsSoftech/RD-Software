@@ -58,7 +58,7 @@
                                                 <th>GRN No</th>
                                                 <th>Supplier Id</th>
                                                 <th>Supplier Name</th>
-                                                <th>Supplier PO#</th>
+                                                <!-- <th>Supplier PO#</th> -->
                                                 <th>Challan No</th>
                                                 <th>No. of Boxes</th>
                                                 <th>Status</th>
@@ -74,11 +74,11 @@
                                                 <tr <?php if( $grn['status'] == 2) : ?> style="background: #FDEDEC;" <?php endif; ?>>
                                                     <td><?=$i;?></td>
                                                     <td><?=$grn['grn_number'];?></td>
-                                                    <td><?=GetSupplierData( $grn['sup_id'] )->supplier_name;?></td>
-                                                    <td><?=GetSupplierData( $grn['sup_id'] )->supplier_code;?></td>
-                                                    <td><?=SPOData( $grn['sup_po_num'] )->po_num;?></td>
-                                                    <td><?=$grn['challan_num'];?></td>
-                                                    <td><?=$grn['box_num'];?></td>
+                                                    <td><?=GetSupplierData( Get_Bill_data( $grn['bill_id'] )->sup_id )->supplier_code;?></td>
+                                                    <td><?=GetSupplierData( Get_Bill_data( $grn['bill_id'] )->sup_id )->supplier_name;?></td>
+                                                    <!-- <td><?=SPOData( $grn['sup_po_num'] )->po_num;?></td> -->
+                                                    <td><?php echo Get_Bill_data( $grn['bill_id'] )->challan_num; ?></td>
+                                                    <td><?php echo Get_Bill_data( $grn['bill_id'] )->num_of_box; ?></td>
                                                     <td><?php if( $grn['status'] == 2) : ?><span style="color:#ff6666;">Not Approved</span> <?php else : ?> <span style="color:green;">Approved</span> <?php endif; ?></td>
                                                     <td>
                                                     <?php if( is_UserAllowed('add_grn_item')){ ?>
@@ -95,7 +95,7 @@
                                                 <th>GRN No</th>
                                                 <th>Supplier Id</th>
                                                 <th>Supplier Name</th>
-                                                <th>Supplier PO#</th>
+                                                <!-- <th>Supplier PO#</th> -->
                                                 <th>Challan No</th>
                                                 <th>No. of Boxes</th>
                                                 <th>Action</th>

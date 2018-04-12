@@ -37,7 +37,7 @@
 				<!-- info row -->
 				<div class="row" style="margin-bottom:20px; border-bottom:1px solid #000; padding:5px;">
 					<div class="col-md-6 invoice-col">
-						<table id="example2" class="table sv_table_heading table-bordered table-hover">
+						<table id="example2" class="table sv_table_heading table-bordered table-hover" style="width:100%; border-spacing: 0; border-collapse: collapse;">
 							<tbody>    
 								<tr>
 									<th style="width: 50%; border:1px solid #000;">GRN Number</th>
@@ -45,23 +45,19 @@
 								</tr>  
 								<tr>
 									<th style="width: 50%; border:1px solid #000;">Supplier Name</th>
-									<td style="width: 50%; border:1px solid #000;"><?=GetSupplierData( $grn->sup_id )->supplier_name;?></td>
-								</tr>
-								<tr>
-									<th style="width: 50%; border:1px solid #000;">Supplier P#</th>
-									<td style="width: 50%; border:1px solid #000;"><?php echo SPOData( $grn->sup_po_num )->po_num; ?></td>
+									<td style="width: 50%; border:1px solid #000;"><?=GetSupplierData( Get_Bill_data( $grn->bill_id )->sup_id )->supplier_name;?></td>
 								</tr>
 								<tr>
 									<th style="width: 50%; border:1px solid #000;">Challan Number</th>
-									<td style="width: 50%; border:1px solid #000;"><?php echo $grn->challan_num; ?></td>
+									<td style="width: 50%; border:1px solid #000;"><?php echo Get_Bill_data( $grn->bill_id )->challan_num; ?></td>
 								</tr> 
 								<tr>
 									<th style="width: 50%; border:1px solid #000;">Challan Date</th>
-									<td style="width: 50%; border:1px solid #000;"><?php echo date("j F, Y", strtotime($grn->challan_date)); ?></td>
+									<td style="width: 50%; border:1px solid #000;"><?php echo date("j F, Y", strtotime(Get_Bill_data( $grn->bill_id )->challan_date)); ?></td>
 								</tr>   
 								<tr>
 									<th style="width: 50%; border:1px solid #000;">No. of Boxes</th>
-									<td style="width: 50%; border:1px solid #000;"><?php echo $grn->box_num; ?></td>
+									<td style="width: 50%; border:1px solid #000;"><?php echo Get_Bill_data( $grn->bill_id )->num_of_box; ?></td>
 								</tr>
 								<!-- 
 <tr>
@@ -104,6 +100,7 @@
 									<th style="border:1px solid #000;">Item Code</th>
 									<th style="border:1px solid #000;">Item Description</th>
 									<th style="border:1px solid #000;">Unit</th>
+									<th style="border:1px solid #000;">Supplier PO#</th>
 									<th style="border:1px solid #000;">Challan Qty</th>
 									<th style="border:1px solid #000;">Recieved Qty</th>
 									<th style="border:1px solid #000;">Accepted Qty</th>
@@ -129,6 +126,7 @@
 									<td style="border:1px solid #000;"><?php echo GetItemData( $grnItem['item_id'] )->ITEM_CODE; ?></td>
 									<td style="border:1px solid #000;"><?php echo GetItemData( $grnItem['item_id'] )->ITEM_DESC; ?></td>
 									<td style="border:1px solid #000;"><?php echo GetItemUnit( GetItemData( $grnItem['item_id'] )->ITEM_UNIT); ?></td>
+									<td style="border:1px solid #000;"><?php echo SPOData($grnItem['supplier_po_id'])->po_num; ?></td>
 									<td style="border:1px solid #000;"><?php echo $grnItem['challan_qty']; ?></td>
 									<td style="border:1px solid #000;"><?php echo $grnItem['received_qty']; ?></td>
 									<td style="border:1px solid #000;"><?php echo $grnItem['accepted_qty']; ?></td>

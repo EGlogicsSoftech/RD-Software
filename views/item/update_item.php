@@ -98,6 +98,12 @@
                                         </div>
                                         
                                         <div class="form-group col-md-6">
+                                            <label>Manufacturing Timeframe</label>
+                                            <input type="text" class="form-control" name="man_timeframe" placeholder="Manufacturing Timeframe" value="<?php echo $item->MANUFACTURING_TIMEFRAME; ?>" />
+                                            <?php echo form_error('man_timeframe'); ?>
+                                        </div>
+                                        
+                                        <div class="form-group col-md-6">
                                             <label>Country of Origin <span style="color:red;">*</span></label>
                                             <select class="form-control" name="item_country">
                                                 <option value="">Select Country</option>

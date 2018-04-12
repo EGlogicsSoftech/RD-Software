@@ -112,12 +112,23 @@
 												</tr> 	
 											<?php endif; ?>
                                             <tr>
-                                                <th style="width: 25%;">Date</th>
-                                                <td><?php echo $packing->date; ?></td>
-                                            </tr>
-                                            <tr>
                                                 <th style="width: 25%;">Packing Number</th>
                                                 <td><?php echo $packing->packing_num; ?></td>
+                                            </tr>
+                                            
+                                            <?php if( $packing->status == 1) : ?>
+												<tr>
+													<th style="width: 25%;">Approved By</th>
+													<td><?php echo GetUserData($packing->approved_by)->name; ?></td>
+												</tr>
+											<?php endif; ?>
+                                            <tr>
+                                                <th style="width: 25%;">Created By</th>
+                                                <td><?php echo GetUserData($packing->created_by)->name; ?></td>
+                                            </tr>
+                                            <tr>
+                                                <th style="width: 25%;">Date</th>
+                                                <td><?php echo $packing->date; ?></td>
                                             </tr>
                                             
                                         </tbody>
@@ -133,34 +144,39 @@
 								
 									<form enctype="multipart/form-data" action="<?=base_url('packing/save_shipping').'/'.$packing->id; ?>" method="post">
 
-										<?php $shipping_data = GetPLShippingData($packing->packing_id); ?>
+										<?php 	$shipping_data = GetPLShippingData($packing->packing_id);
+												
+												$pol = (isset($shipping_data->pol) ? $shipping_data->pol : '');
+												$pod = (isset($shipping_data->pod) ? $shipping_data->pod : '');
+												$fd = (isset($shipping_data->fd) ? $shipping_data->fd : '');
+										 ?>
 										
 										<div class="form-group col-md-4">
 											<label>Port of Loading</label>
-											<input type="text" class="form-control" rows="3" name="pol" placeholder="Enter Port of Loading" value="<?php echo $shipping_data->pol;?>">
+											<input type="text" class="form-control" rows="3" name="pol" placeholder="Enter Port of Loading" value="<?php echo $pol;?>">
 											<?php echo form_error('pol'); ?>
 										</div>
 									
 										<div class="form-group col-md-4">
 											<label>Port of Discharge</label>
-											<input type="text" class="form-control" rows="3" name="pod" placeholder="Enter Port of Discharge" value="<?php echo $shipping_data->pod;?>">
+											<input type="text" class="form-control" rows="3" name="pod" placeholder="Enter Port of Discharge" value="<?php echo $pod;?>">
 											<?php echo form_error('pod'); ?>
 										</div>
 									
 										<div class="form-group col-md-4">
 											<label>Final Destination</label>
-											<input type="text" class="form-control" rows="3" name="fd" placeholder="Enter Final Destination" value="<?php echo $shipping_data->fd;?>">
+											<input type="text" class="form-control" rows="3" name="fd" placeholder="Enter Final Destination" value="<?php echo $fd;?>">
 											<?php echo form_error('fd'); ?>
 										</div>
 										
 										<?php if( is_UserAllowed('update_shipping_info')){ ?>
-										
+										<?php if( $packing->status != 1) : ?>
 											<div class="form-group col-md-12">   
 												<input type="hidden" name="id" value="<?php echo $packing->id; ?>" />
 												<input type="hidden" name="p_id" value="<?php echo $packing->packing_id; ?>" />
 												<input type="submit" class="btn btn-info" value="Submit">
 											</div>
-										<?php } ?>
+										<?php endif; } ?>
 										
 										<div style="clear:both;"></div>
 										

@@ -73,6 +73,23 @@ class Report extends CI_Controller {
 			$data['customers'] = $this->db->get_where('customer',array('status'=>'1'))->result_array();
 			$this->RedirectToPageWithData('report/statistical_finished',$data);
 		}
+		
+	public function item_pending()
+		{
+			if( !is_UserAllowed('rep_item_pending')){ header('Location: '.base_url().'admin/dashboard'); }
+			
+			$data['title']='PENDING ITEMS';
+			$this->RedirectToPageWithData('report/item_pending',$data);
+		}
+		
+	public function gst()
+		{
+			if( !is_UserAllowed('rep_gst')){ header('Location: '.base_url().'admin/dashboard'); }
+			
+			$data['title']='GST';
+			$data['suppliers']=$this->db->get_where('supplier',array('status'=>'1'))->result_array();
+			$this->RedirectToPageWithData('report/gst',$data);
+		}
 
 	public function customer()
 		{
@@ -388,6 +405,64 @@ class Report extends CI_Controller {
 
 		echo $html;	
 	}
+	
+	function fetch_items()
+		{
+			$fetch_data = $this->Admin_model->rep_make_datatables();
+
+           	$data = array();
+           	$no = $_POST['start'];
+
+           	foreach($fetch_data as $row)
+           	{
+           		$no++;
+           		
+           		$item = $row->ITEM_ID;
+           		
+           		$sup_id = GetItemData($item)->SUPPLIER_ID;
+				$sup_data = Get_Supplier_Data_by_Array_ID($sup_id);
+				$sup_code = array();
+
+				foreach($sup_data as $sup_dat)
+					{
+						$sup_code[] = $sup_dat['supplier_code'];
+					}
+
+				$stock = CheckStockbyItem($item);
+				$stock_entry = (isset($stock->SUMA) ? $stock->SUMA : 0);
+				$stock_issue = (isset($stock->SUMB) ? $stock->SUMB : 0);
+				$spo_qty = Get_Total_SPO_QTY($item);
+				$order_balance = GetOrderInHand($item);
+				$total_order = Get_Total_Order($item);
+
+                $sub_array = array();
+                $sub_array[] = $no;
+                $sub_array[] = GetItemData($item)->ITEM_CODE;
+                $sub_array[] = GetItemData($item)->ITEM_DESC;
+                $sub_array[] = GetItemData($item)->MANUFACTURING_TIMEFRAME;
+                $sub_array[] = implode(", ",$sup_code);
+				$sub_array[] = $stock_entry - $stock_issue;
+				$sub_array[] = $spo_qty;
+				$sub_array[] = $total_order;
+				$sub_array[] = $order_balance;
+                $sub_array[] = '';
+                $sub_array[] = '';
+                
+                $data[] = $sub_array;
+
+                //$i++;
+           	}
+			
+          	$output = array(
+                "draw"					=>     intval($_POST["draw"]),
+                "recordsTotal"          =>     $this->Admin_model->get_all_data(),
+                "recordsFiltered"     	=>     $this->Admin_model->get_filtered_data(),
+                "data"                  =>     $data
+           );
+
+           	echo json_encode($output);
+
+		}
 
 
 }

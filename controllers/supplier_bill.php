@@ -43,7 +43,7 @@ class Supplier_bill extends CI_Controller {
 
 	public function add()
 	{
-		//if( !is_UserAllowed('add_grn')){ header('Location: '.base_url().'admin/dashboard'); }
+		if( !is_UserAllowed('add_bill')){ header('Location: '.base_url().'admin/dashboard'); }
 		
 		$data['title']='Add Supplier Bill';
 		$data['suppliers']= GetAllSupplier();
@@ -72,7 +72,7 @@ class Supplier_bill extends CI_Controller {
 
 	public function all_bills()
 	{
-		//if( !is_UserAllowed('all_grn')){ header('Location: '.base_url().'admin/dashboard'); }
+		if( !is_UserAllowed('all_bill')){ header('Location: '.base_url().'admin/dashboard'); }
 		
 		$data['title']='Manage Bills';
 		$data['bills']= GetBills();
@@ -83,13 +83,51 @@ class Supplier_bill extends CI_Controller {
 		{
 			$this->load->library('pdf');
 			
-			$this->data['title'] = "GRN";
+			$this->data['title'] = "Supplier Bill";
 			
-			$this->data['grn'] = $this->db->get_where('grn',array('grn_id'=>$id))->row();
+			$this->data['bill'] = $this->db->get_where('supplier_bill',array('bill_id'=>$id))->row();
 			
-			$html = $this->load->view('grn/export_pdf',$this->data, true); //load the pdf_output.php by passing our data and get all data in $html varriable.
+			$html = $this->load->view('supplier_bill/export_pdf',$this->data, true); //load the pdf_output.php by passing our data and get all data in $html varriable.
 	 
-			$pdfFilePath ="GRN-".$this->data['grn']->grn_number.".pdf";
+			$pdfFilePath ="Bill-".$this->data['bill']->challan_num.".pdf";
+
+			$pdf = $this->pdf->load();
+			
+			$pdf->WriteHTML($html,2);
+			
+			$pdf->Output($pdfFilePath, "D");
+		}
+		
+	public function Export_GRN_PDF($id)
+		{
+			$this->load->library('pdf');
+			
+			$this->data['title'] = "Supplier GRN Bill";
+			
+			$this->data['bill'] = $this->db->get_where('supplier_bill',array('bill_id'=>$id))->row();
+			
+			$html = $this->load->view('supplier_bill/export_grn_pdf',$this->data, true); //load the pdf_output.php by passing our data and get all data in $html varriable.
+	 
+			$pdfFilePath ="GRN_Bill-".$this->data['bill']->challan_num.".pdf";
+
+			$pdf = $this->pdf->load();
+			
+			$pdf->WriteHTML($html,2);
+			
+			$pdf->Output($pdfFilePath, "D");
+		}
+		
+	public function Export_Debit_PDF($id)
+		{
+			$this->load->library('pdf');
+			
+			$this->data['title'] = "Debit Note";
+			
+			$this->data['bill'] = $this->db->get_where('supplier_bill',array('bill_id'=>$id))->row();
+			
+			$html = $this->load->view('supplier_bill/export_debit_pdf',$this->data, true); //load the pdf_output.php by passing our data and get all data in $html varriable.
+	 
+			$pdfFilePath ="Debit_note-".$this->data['bill']->challan_num.".pdf";
 
 			$pdf = $this->pdf->load();
 			
@@ -138,6 +176,186 @@ class Supplier_bill extends CI_Controller {
 			$this->excel->setActiveSheetIndex(0);
 			//name the worksheet
 			$this->excel->getActiveSheet()->setTitle('GRN');
+			//set cell A1 content with some text
+			$this->excel->getActiveSheet()->setCellValue('A1', 'RICKSHAW DELIVERY (Est.2004)');
+			$this->excel->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('A3', 'GRN Number');
+			$this->excel->getActiveSheet()->getStyle('A3')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('A4', 'Supplier Name');
+			$this->excel->getActiveSheet()->getStyle('A4')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('A5', 'Supplier P#');
+			$this->excel->getActiveSheet()->getStyle('A5')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('A6', 'Challan Number');
+			$this->excel->getActiveSheet()->getStyle('A6')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('A7', 'Challan Date');
+			$this->excel->getActiveSheet()->getStyle('A7')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('A8', 'No. of Boxes');
+			$this->excel->getActiveSheet()->getStyle('A8')->getFont()->setBold(true);
+			// 
+// 			$this->excel->getActiveSheet()->setCellValue('A8', 'Approved By');
+// 			$this->excel->getActiveSheet()->getStyle('A8')->getFont()->setBold(true);
+// 			
+// 			$this->excel->getActiveSheet()->setCellValue('A9', 'Created By');
+// 			$this->excel->getActiveSheet()->getStyle('A9')->getFont()->setBold(true);
+// 			
+// 			$this->excel->getActiveSheet()->setCellValue('A10', 'Created At');
+// 			$this->excel->getActiveSheet()->getStyle('A10')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('B3', $data['grn']->grn_number);
+			$this->excel->getActiveSheet()->setCellValue('B4', GetSupplierData( $data['grn']->sup_id )->supplier_name);
+			$this->excel->getActiveSheet()->setCellValue('B5', SPOData( $data['grn']->sup_po_num )->po_num);
+			$this->excel->getActiveSheet()->setCellValue('B6', $data['grn']->challan_num);
+			$this->excel->getActiveSheet()->setCellValue('B7', $FormatedDate);
+			$this->excel->getActiveSheet()->setCellValue('B8', $data['grn']->box_num);
+			// $this->excel->getActiveSheet()->setCellValue('B8', GetUserData($data['grn']->approved_by)->name);
+// 			$this->excel->getActiveSheet()->setCellValue('B9', GetUserData($data['grn']->created_by)->name);
+// 			$this->excel->getActiveSheet()->setCellValue('B10', date("j F, Y | H:i:s", strtotime($data['grn']->date)));
+			
+			$this->excel->getActiveSheet()->getStyle('A15:K15')->applyFromArray($border);
+			$this->excel->getActiveSheet()->setCellValue('A15', 'Sr #');
+			$this->excel->getActiveSheet()->getStyle('A15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('B15', 'Item Code');
+			$this->excel->getActiveSheet()->getStyle('B15')->getFont()->setBold(true);
+			$this->excel->getActiveSheet()->getColumnDimension('B')->setWidth("15");
+			
+			$this->excel->getActiveSheet()->setCellValue('C15', 'Item Description');
+			$this->excel->getActiveSheet()->getStyle('C15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('D15', 'Unit');
+			$this->excel->getActiveSheet()->getStyle('D15')->getFont()->setBold(true);
+			$this->excel->getActiveSheet()->getColumnDimension('D')->setWidth("20");
+			
+			$this->excel->getActiveSheet()->setCellValue('E15', 'Challan Qty');
+			$this->excel->getActiveSheet()->getStyle('E15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('F15', 'Received Qty');
+			$this->excel->getActiveSheet()->getStyle('F15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('G15', 'Accepted Qty');
+			$this->excel->getActiveSheet()->getStyle('G15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('H15', 'Rejected Qty');
+			$this->excel->getActiveSheet()->getStyle('H15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('I15', 'Difference Qty');
+			$this->excel->getActiveSheet()->getStyle('I15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('J15', 'Stocked Qty');
+			$this->excel->getActiveSheet()->getStyle('J15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('K15', 'Remarks Qty');
+			$this->excel->getActiveSheet()->getStyle('K15')->getFont()->setBold(true);
+			
+			$objDrawing = new PHPExcel_Worksheet_Drawing();
+			$objDrawing->setName('Logo');
+			$objDrawing->setDescription('Logo');
+			//Path to signature .jpg file
+			$objDrawing->setPath('./admin/img/RIKSHAW_DELIVERY.png');
+			$objDrawing->setOffsetX(10);                     //setOffsetX works properly
+			$objDrawing->setOffsetY(8);                     //setOffsetX works properly
+			$objDrawing->setCoordinates('D1');             //set image to cell E38
+			$objDrawing->setHeight(35);                     //signature height
+			$objDrawing->setWorksheet($this->excel->getActiveSheet());  //save
+			
+			$grn_items = GetGRNItems( $data['grn']->grn_id );
+			
+			//$row_num = count($sup_po_items);
+			//$rs = $this->db->get('countries');
+			$exceldata="";
+			$exceldata1="";
+			$total="";
+			
+			$i=1;
+			$j=16;
+			foreach ($grn_items as $row){
+				
+				$itemUnitID = GetItemUnit( GetItemData( $row['item_id'] )->ITEM_UNIT);
+				
+				$GRNtoSTOCK = GRNtoSTOCK($row['grn_row_id'], $row['item_id']);
+				
+				$diff_qty = $row['received_qty'] - $row['challan_qty'];
+				
+				$exceldata1[] = array('sno' => $i, 'item_code' => GetItemData( $row['item_id'] )->ITEM_CODE,'description' => GetItemData( $row['item_id'] )->ITEM_DESC, 'unit' => $itemUnitID, 'challan_qty' => $row['challan_qty'], 'received_qty' => $row['received_qty'], 'accepted_qty' => $row['accepted_qty'], 'rejected_qty' => $row['received_qty'] - $row['accepted_qty'], 'difference_qty' => $diff_qty, 'stocked_qty' => $GRNtoSTOCK, 'remarks' => $row['remarks']);
+				
+			$i++; $j++; }
+			
+			$start_row = 16;
+			$total_row = count($exceldata1);
+			
+			$x_row = $start_row + $total_row + 1;
+			
+			//Fill data 
+			$this->excel->getActiveSheet()->fromArray($exceldata1, null, 'A16');
+			
+			$this->excel->getActiveSheet()->getStyle('A15:K'.$x_row)->getAlignment()->setWrapText(true);
+			$this->excel->getActiveSheet()->getStyle('A15:K'.$x_row)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+			$this->excel->getActiveSheet()->getStyle('A15:K'.$x_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$this->excel->getActiveSheet()->getStyle("A15:K".$x_row)->applyFromArray($allborder);
+		 	
+		 	$this->excel->getActiveSheet()->getStyle('A16:K'.$x_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			
+			$filename='GRN_'.$data['grn']->grn_number.'.xls'; //save our workbook as this file name
+			header('Content-Type: application/octet-stream'); //mime type
+			header('Content-Disposition: attachment;filename="'.$filename.'"'); //tell browser what's the file name
+			header('Cache-Control: max-age=0'); //no cache
+			
+			
+
+			//save it to Excel5 format (excel 2003 .XLS file), change this to 'Excel2007' (and adjust the filename extension, also the header mime type)
+			//if you want to save it as .XLSX Excel 2007 format
+			$objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');  
+			//force user to download the Excel file without writing it to server's HD
+			$objWriter->save('php://output');
+				 
+		}
+		
+	public function Export_GRN_EXCEL($id)
+		{
+		
+			$data['grn'] = $this->db->get_where('grn',array('grn_id'=>$id))->row();
+			
+			$grn_data = GetGRNItems($data['grn']->grn_row_id);
+			
+			$FormatedDate = date("j F, Y", strtotime($data['grn']->challan_date));
+			
+			$styleArray = array(
+			'font'  => array(
+				'size'  => 11,
+				'name'  => 'Verdana'
+			));
+			
+			$border = array(
+				'borders' => array(
+					'outline' => array(
+						'style' => PHPExcel_Style_Border::BORDER_THIN,
+						'color' => array('rgb' => '000000'),
+					),
+				),
+			);
+			
+			$allborder = array(
+				'borders' => array(
+					'allborders' => array(
+						'style' => PHPExcel_Style_Border::BORDER_THIN,
+						'color' => array('rgb' => '000000'),
+					),
+				),
+			);
+			
+    		$this->excel->getActiveSheet()->getDefaultStyle()->applyFromArray($styleArray);
+    		
+    		$this->excel->getActiveSheet()->getStyle("A3:B7")->applyFromArray($border);
+		
+			$this->excel->setActiveSheetIndex(0);
+			//name the worksheet
+			$this->excel->getActiveSheet()->setTitle('GRN BILL');
 			//set cell A1 content with some text
 			$this->excel->getActiveSheet()->setCellValue('A1', 'RICKSHAW DELIVERY (Est.2004)');
 			$this->excel->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
@@ -405,7 +623,18 @@ class Supplier_bill extends CI_Controller {
 					}
 			}
 	}
-
+	
+	public function debit_note($id)
+	{
+		if( !is_UserAllowed('debit_note')){ header('Location: '.base_url().'admin/dashboard'); }
+		
+		$data['title']='Debit Note';
+		$data['bill'] = $this->db->get_where('supplier_bill',array('id'=>$id))->row();
+		//$data['items']= GetItem();
+		$data['msg']=$this->session->flashdata('msg');
+		$this->RedirectToPageWithData('supplier_bill/debit_note',$data);
+	}
+	
 	public function view($id)
 	{
 		$data['title']='View Bills';
@@ -470,7 +699,7 @@ class Supplier_bill extends CI_Controller {
 	
 	public function approve_bill($bid)
 		{
-			//if( !is_UserAllowed('approve_grn')){ header('Location: '.base_url().'admin/dashboard'); }
+			if( !is_UserAllowed('approve_bill')){ header('Location: '.base_url().'admin/dashboard'); }
 			
 			$uid = $this->db->get_where('login',array('id'=>$this->session->userdata('id')))->row('id');
 			
@@ -488,25 +717,24 @@ class Supplier_bill extends CI_Controller {
 					}
 			
 		}
-	public function editGrnItem($id)
+	public function editBillItem($id)
 	{
-		if( !is_UserAllowed('update_grn_item')){ header('Location: '.base_url().'admin/dashboard'); }
+		if( !is_UserAllowed('update_bill_item')){ header('Location: '.base_url().'admin/dashboard'); }
 		
-		$data['title']='Edit Grn Item';
+		$data['title']='Edit Bill Item';
 		$data['suppliers']= GetAllSupplier();
-		//$data['items']= GetItem();
-		$data['grnrow']=$this->db->get_where('grn_item',array('id'=>$id))->row();
+		$data['billitem']=$this->db->get_where('bill_item',array('id'=>$id))->row();
 		$data['msg']=$this->session->flashdata('msg');
-		$this->RedirectToPageWithData('grn/edit_grn_item',$data);
+		$this->RedirectToPageWithData('supplier_bill/edit_bill_item',$data);
 	}
 	
-	function UpdateGrnItem($id)
+	function updateBillItem($id)
 	{
 		$this->form_validation->set_error_delimiters('<p class="text-red">', '</p>');
+	 	$this->form_validation->set_rules('spo','Supplier PO',  'required');
 	 	$this->form_validation->set_rules('item_id','item Id',  'required');
 		$this->form_validation->set_rules('challan_qty','Challan Qty',  'required');
-		$this->form_validation->set_rules('received_qty','Received Qty',  'required');
-		$this->form_validation->set_rules('accepted_qty','Accepted Qty',  'required');
+		$this->form_validation->set_rules('total_gst','Total GST',  'required');
 	 	$this->form_validation->set_rules('validate', 'validate', 'callback_check_database');
 
 		if($this->form_validation->run() == FALSE) // validation hasn't been passed
@@ -515,28 +743,27 @@ class Supplier_bill extends CI_Controller {
 			}
 		else 
 			{
-				$GrnItemData = array(
+				$data = array(
+					'supplier_po_id' => @$this->input->post('spo'),
 					'item_id' => @$this->input->post('item_id'),
 					'challan_qty' => @$this->input->post('challan_qty'),
-					'received_qty' => @$this->input->post('received_qty'),
-					'accepted_qty' => @$this->input->post('accepted_qty'),
-					'remarks' => @$this->input->post('remarks'),
+					'gst' => @$this->input->post('total_gst'),
 				);
 	
-				$result = $this->Admin_model->UpdateGrnItem($id, $GrnItemData);
+				$result = $this->Admin_model->UpdateBillItem($id, $data);
 				
-				$grn_row_id = $this->db->get_where('grn_item',array('id'=>$result))->row('grn_row_id');
-				$grnID = $this->db->get_where('grn',array('grn_id'=>$grn_row_id))->row('id');
+				//$grn_row_id = $this->db->get_where('grn_item',array('id'=>$result))->row('grn_row_id');
+				//$grnID = $this->db->get_where('grn',array('grn_id'=>$grn_row_id))->row('id');
 				
 				if ($result == false) 
 					{
 						$this->session->set_flashdata('msg','<span class="text-red">An error occurred saving your information. Please try again later</span>');
-						redirect(base_url().'grn/view/'.$grnID);   // or whatever logic needs to occur
+						redirect(base_url().'supplier_bill/editBillItem/'.$id);   // or whatever logic needs to occur
 					}
 				else
 					{
 						$this->session->set_flashdata('msg','<span class="text-green">Item added successfully.</span>');
-						redirect(base_url().'grn/view/'.$grnID);   // or whatever logic needs to occur	
+						redirect(base_url().'supplier_bill/editBillItem/'.$id);   // or whatever logic needs to occur	
 					}
 			}
 	}

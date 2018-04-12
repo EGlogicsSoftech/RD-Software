@@ -495,7 +495,7 @@ function saveGrn($GrnData)
 		return false;
 		}
 	}
-	
+
 function saveBill($data)
 	{
 	if($this->db->insert('supplier_bill', $data)){
@@ -542,7 +542,7 @@ function SaveGrnItem($GrnItemData)
 		return false;
 		}
 	}
-	
+
 function SaveBillItem($data)
 	{
 	if($this->db->insert('bill_item', $data)){
@@ -561,6 +561,19 @@ function UpdateGrnItem($id, $GrnItemData)
 		$this->db->where('id', $id);
 
 		if($this->db->update('grn_item', $GrnItemData)){
+		return $id;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+function UpdateBillItem($id, $data)
+	{
+		$this->db->where('id', $id);
+
+		if($this->db->update('bill_item', $data)){
 		return $id;
 		}
 		else
@@ -985,7 +998,7 @@ function ApproveGRN($gid, $uid)
 		return false;
 		}
 	}
-	
+
 function ApproveBILL($bid, $uid)
 	{
 		$this->db->where('id', $bid);
@@ -1077,11 +1090,11 @@ function RemoveStockIssueItem($rowid)
 		}
 	}
 
-	function ApprovePacking($id)
+	function ApprovePacking($id, $uid)
 	{
 		$this->db->where('id', $id);
 
-		if($this->db->update('packing_list', array('status'=>1))){
+		if($this->db->update('packing_list', array('status'=>1, 'approved_by'=>$uid))){
 		return $id;
 		}
 		else
@@ -1204,7 +1217,7 @@ function RemoveStockIssueItem($rowid)
 
 	function make_query()
     	{
-    		$search = $_POST["search"]["value"];
+    			$search = $_POST["search"]["value"];
         	$this->db->select($this->select_column);
            	$this->db->from('item as I');
            	$this->db->where('I.STATUS','1');
@@ -1215,6 +1228,21 @@ function RemoveStockIssueItem($rowid)
            			//$this->db->like("ITEM_CODE", );
                 	//$this->db->or_like("ITEM_DESC", $_POST["search"]["value"]);
            		}
+
+							if(isset($_POST["category"]) &&  $_POST["category"] !='' )
+							{
+								$this->db->where('I.CATEGORY_NAME',$_POST["category"]);
+							}
+
+							if(isset($_POST["item"]))
+							{
+								$this->db->where_in('I.ITEM_ID',$_POST['item']);
+							}
+
+							if(isset($_POST["item_country"]))
+							{
+								$this->db->where('I.COUNTRY_ID',$_POST["item_country"]);
+							}
 
            	if(isset($_POST["order"]))
            		{
@@ -1231,9 +1259,11 @@ function RemoveStockIssueItem($rowid)
         	$this->make_query();
 
            	if($_POST["length"] != -1)
-           		{
-                	$this->db->limit($_POST['length'], $_POST['start']);
-           		}
+           	{
+              $this->db->limit($_POST['length'], $_POST['start']);
+           	}
+
+
 
            	$query = $this->db->get();
 
@@ -1573,6 +1603,48 @@ function RemoveStockIssueItem($rowid)
 			return false;
 			}
 		}
+
+	//var $table = "item";
+	//var $rep_select_column = array("ITEM_ID");
+	//var $rep_order_column = array(null, "ITEM_CODE", "CATEGORY_NAME", null, null);
+
+	function rep_make_query()
+    	{
+    		$search = $_POST["search"]["value"];
+        	$this->db->select(array("ITEM_ID"));
+           	$this->db->from('item as I');
+           	$this->db->where('I.STATUS','1');
+
+           	if(isset($_POST["search"]["value"]))
+           		{
+           			$this->db->where("(I.ITEM_CODE LIKE '%$search%' OR I.ITEM_DESC LIKE '%$search%')");
+           			//$this->db->like("ITEM_CODE", );
+                	//$this->db->or_like("ITEM_DESC", $_POST["search"]["value"]);
+           		}
+
+           	// if(isset($_POST["order"]))
+//            		{
+//                 	$this->db->order_by($this->rep_order_column[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+//            		}
+//            	else
+//            		{
+//                 	$this->db->order_by('ID', 'DESC');
+//            		}
+      	}
+
+	function rep_make_datatables()
+		{
+        	$this->rep_make_query();
+
+           	if($_POST["length"] != -1)
+           		{
+                	$this->db->limit($_POST['length'], $_POST['start']);
+           		}
+
+           	$query = $this->db->get();
+
+           	return $query->result();
+      	}
 
 }
 

@@ -67,6 +67,7 @@
                                     	<?php if( $grnItems ) { ?> <a style="color:orange;" href="/grn/Export_EXCEL/<?php echo $grn->grn_id; ?>">Export Excel</a> | <a style="color:orange;" href="/grn/Export_PDF/<?php echo $grn->grn_id; ?>">Export PDF</a> <?php } ?>
                                     </div>
                                 </div>
+                                
                             	<div class="box-body table-responsive">
                                     <table id="example2" class="table sv_table_heading table-bordered table-hover">
                                         <tbody>    
@@ -85,29 +86,22 @@
                                              <tr>
                                                 <th style="width: 25%;">Challan Date</th>
                                                 <td><?php echo date("j F, Y", strtotime(Get_Bill_data( $grn->bill_id )->challan_date)); ?></td>
-                                            </tr>   
+                                            </tr> 
+  
                                             <tr>
                                                 <th style="width: 25%;">No. of Boxes</th>
                                                 <td><?php echo Get_Bill_data( $grn->bill_id )->num_of_box; ?></td>
                                             </tr>
-                                            <tr>
-                                                <th style="width: 25%;">Challan</th>
-                                                <td>
-                                                	<?php $img = Get_Bill_data( $grn->bill_id )->challan_img; if( $img ): ?>
-														<a target="_blank" href="<?=base_url();?>uploads/grn_images/<?php echo $grn->challan_img; ?>">Download</a>
-													<?php endif; ?>
-                                                </td>
-                                            </tr> 
                                             
                                             <?php if( $grn->status == 1) : ?>
 												<tr>
 													<th style="width: 25%;">Approved By</th>
-													<td><?php echo GetUserData(Get_Bill_data( $grn->approved_by) ); ?></td>
+													<td><?php echo GetUserData($grn->approved_by )->name; ?></td>
 												</tr>
 											<?php endif; ?>
                                             <tr>
                                                 <th style="width: 25%;">Created By</th>
-                                                <td><?php echo GetUserData(Get_Bill_data( $grn->created_by) ); ?></td>
+                                                <td><?php echo GetUserData( $grn->created_by )->name; ?></td>
                                             </tr>
 
                                             <tr>
@@ -142,28 +136,34 @@
 												<div class="form-group col-md-6">
 													<?php $items = Get_Items_of_bill($grn->bill_id); ?>
 													<label>Items <span style="color:red;">*</span></label>
-													<select class="form-control" name="item_id"  style="width:100%;">
+													<select class="form-control item_id" name="item_id"  style="width:100%;">
 														<option value="">Select Item</option>
 														<?php foreach( $items as $item ) :  ?>
-															<option value="<?=$item['item_id'];?>"><?=GetItemData( $item['item_id'] )->ITEM_CODE;?></option>
+															<option data-billid="<?php echo $grn->bill_id; ?>" value="<?=$item['item_id'];?>"><?=GetItemData( $item['item_id'] )->ITEM_CODE;?></option>
 														<?php endforeach; ?>
 													</select>
 													<?php echo form_error('item_id'); ?>
 												</div>
 
 												<div class="form-group col-md-6">
+													<label>Supplier PO# <span style="color:red;">*</span></label>
+													<input type="text" readonly class="form-control po_num" name="po_num" value=""/>
+													<?php echo form_error('po_num'); ?>
+												</div>
+												
+												<div class="form-group col-md-4">
 													<label>Challan Qty <span style="color:red;">*</span></label>
-													<input type="text" class="form-control challan_qty" name="challan_qty" value=""/>
+													<input type="text" readonly class="form-control challan_qty" name="challan_qty" value=""/>
 													<?php echo form_error('challan_qty'); ?>
 												</div>
 
-												<div class="form-group col-md-6">
+												<div class="form-group col-md-4">
 													<label>Received Qty <span style="color:red;">*</span></label>
 													<input type="text" class="form-control received_qty" value="" name="received_qty" />
 													<?php echo form_error('received_qty'); ?>
 												</div>
 
-												<div class="form-group col-md-6">
+												<div class="form-group col-md-4">
 													<label>Accepted Qty <span style="color:red;">*</span></label>
 													<input type="text" class="form-control accepted_qty" onfocusout="rejectedQTY()" name="accepted_qty" value=""/>
 													<?php echo form_error('accepted_qty'); ?>
@@ -190,8 +190,7 @@
 												<input type="hidden" class="form-control" name="grn_id" value="<?php echo $grn->grn_id?>" />
 										
 												<div class="form-group col-md-12">    
-													<!-- <input type="hidden" class="max_recived_qty" name="max_recived_qty" value="" /> -->
-													<input type="submit" class="btn btn-info" value="Submit">
+													<input type="hidden" class="spo_id" name="spo_id" value="" />													<input type="submit" class="btn btn-info" value="Submit">
 												</div>
 												<div style="clear:both;"></div>
 											</form>  
@@ -216,6 +215,7 @@
 													<th>Item Code</th>
 													<th>Item Description</th>
 													<th>Unit</th>
+													<th>Supplier PO#</th>
 													<th>Challan Qty</th>
 													<th>Recieved Qty</th>
 													<th>Accepted Qty</th>
@@ -241,6 +241,7 @@
 													<td><?php echo GetItemData( $grnItem['item_id'] )->ITEM_CODE; ?></td>
 													<td><?php echo GetItemData( $grnItem['item_id'] )->ITEM_DESC; ?></td>
 													<td><?php echo GetItemUnit( GetItemData( $grnItem['item_id'] )->ITEM_UNIT); ?></td>
+													<td><?php echo SPOData($grnItem['supplier_po_id'])->po_num; ?></td>
 													<td><?php echo $grnItem['challan_qty']; ?></td>
 													<td><?php echo $grnItem['received_qty']; ?></td>
 													<td><?php echo $grnItem['accepted_qty']; ?></td>
@@ -253,12 +254,14 @@
 														<td>
 														
 															<?php if( is_UserAllowed('update_grn_item')){ ?>
-																<a style="color:orange;" href="<?=base_url('grn/editGrnItem/'.$grnItem['id']); ?>">Update</a> | 
+																<a style="color:orange;" href="<?=base_url('grn/editGrnItem/'.$grnItem['id']); ?>">Update</a> 
 															<?php } ?>
 														
-															<?php if( is_UserAllowed('remove_grn_item')){ ?>
+															<!-- 
+<?php if( is_UserAllowed('remove_grn_item')){ ?>
 																<a style="color:red;" class="remove_grn_item" rowid="<?php echo $grnItem['id']; ?>" href="#">Remove</a>
 															<?php } ?>
+ -->
 														
 														</td>
 														<?php endif; ?>
@@ -358,6 +361,25 @@
 					}
                     
 				});	
+			});
+			
+			$( ".item_id" ).change(function() {
+				
+				var item_id = $(this).val();
+				var bill_id = $(".item_id option:selected").data('billid');
+				
+				$.ajax({
+					url: '/grn/Get_Bill_Item_QTY',
+					data: {'item_id' : item_id, 'bill_id' : bill_id},
+					type: "post",
+					dataType: "json",
+					success: function(data){
+						alert(data.qty);
+						$('.challan_qty').val(data.qty);
+						$('.spo_id').val(data.spo_id);
+						$('.po_num').val(data.po_num);
+					}
+				});
 			});
            			
            

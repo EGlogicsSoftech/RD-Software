@@ -1398,6 +1398,8 @@ class Packing extends CI_Controller {
 
 	function SavePacking()
 	{
+		$created_by = $this->db->get_where('login',array('id'=>$this->session->userdata('id')))->row('id');
+		
 		$timestamp = $this->input->post('date');
 		$date1 = strtr($timestamp, '/', '-');
 		$inv_date = date('Y-m-d', strtotime($date1));
@@ -1423,6 +1425,7 @@ class Packing extends CI_Controller {
 				$data = array(
 					'packing_id' => time(),
 					'cust_id' => @$this->input->post('packing_custpo'),
+					'created_by' => $created_by,
 					'date' => @$inv_date,
 					'packing_num' => @$this->input->post('packing_no')
 				);
@@ -1714,9 +1717,11 @@ class Packing extends CI_Controller {
 	{
 		if( !is_UserAllowed('approve_packing_list')){ header('Location: '.base_url().'admin/dashboard'); }
 		
+		$uid = $this->db->get_where('login',array('id'=>$this->session->userdata('id')))->row('id');
+		
 		$pid = $_POST['pid'];	
 		
-		$result = $this->Admin_model->ApprovePacking($pid);
+		$result = $this->Admin_model->ApprovePacking($pid, $uid);
 		
 		if($result)
 			{

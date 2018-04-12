@@ -102,9 +102,9 @@ class Grn extends CI_Controller {
 		
 			$data['grn'] = $this->db->get_where('grn',array('grn_id'=>$id))->row();
 			
-			$grn_data = GetGRNItems($data['grn']->grn_row_id);
+			$grn_data = GetGRNItems($data['grn']->grn_id);
 			
-			$FormatedDate = date("j F, Y", strtotime($data['grn']->challan_date));
+			$FormatedDate = date("j F, Y", strtotime(Get_Bill_data( $data['grn']->bill_id )->challan_date));
 			
 			$styleArray = array(
 			'font'  => array(
@@ -132,7 +132,7 @@ class Grn extends CI_Controller {
 			
     		$this->excel->getActiveSheet()->getDefaultStyle()->applyFromArray($styleArray);
     		
-    		$this->excel->getActiveSheet()->getStyle("A3:B7")->applyFromArray($border);
+    		$this->excel->getActiveSheet()->getStyle("A3:B8")->applyFromArray($allborder);
 		
 			$this->excel->setActiveSheetIndex(0);
 			//name the worksheet
@@ -147,8 +147,7 @@ class Grn extends CI_Controller {
 			$this->excel->getActiveSheet()->setCellValue('A4', 'Supplier Name');
 			$this->excel->getActiveSheet()->getStyle('A4')->getFont()->setBold(true);
 			
-			$this->excel->getActiveSheet()->setCellValue('A5', 'Supplier P#');
-			$this->excel->getActiveSheet()->getStyle('A5')->getFont()->setBold(true);
+			
 			
 			$this->excel->getActiveSheet()->setCellValue('A6', 'Challan Number');
 			$this->excel->getActiveSheet()->getStyle('A6')->getFont()->setBold(true);
@@ -169,16 +168,16 @@ class Grn extends CI_Controller {
 // 			$this->excel->getActiveSheet()->getStyle('A10')->getFont()->setBold(true);
 			
 			$this->excel->getActiveSheet()->setCellValue('B3', $data['grn']->grn_number);
-			$this->excel->getActiveSheet()->setCellValue('B4', GetSupplierData( $data['grn']->sup_id )->supplier_name);
-			$this->excel->getActiveSheet()->setCellValue('B5', SPOData( $data['grn']->sup_po_num )->po_num);
-			$this->excel->getActiveSheet()->setCellValue('B6', $data['grn']->challan_num);
+			$this->excel->getActiveSheet()->setCellValue('B4', GetSupplierData( Get_Bill_data( $data['grn']->bill_id )->sup_id )->supplier_name);
+			
+			$this->excel->getActiveSheet()->setCellValue('B6', Get_Bill_data( $data['grn']->bill_id )->challan_num);
 			$this->excel->getActiveSheet()->setCellValue('B7', $FormatedDate);
-			$this->excel->getActiveSheet()->setCellValue('B8', $data['grn']->box_num);
+			$this->excel->getActiveSheet()->setCellValue('B8', Get_Bill_data( $data['grn']->bill_id )->num_of_box);
 			// $this->excel->getActiveSheet()->setCellValue('B8', GetUserData($data['grn']->approved_by)->name);
 // 			$this->excel->getActiveSheet()->setCellValue('B9', GetUserData($data['grn']->created_by)->name);
 // 			$this->excel->getActiveSheet()->setCellValue('B10', date("j F, Y | H:i:s", strtotime($data['grn']->date)));
 			
-			$this->excel->getActiveSheet()->getStyle('A15:K15')->applyFromArray($border);
+			$this->excel->getActiveSheet()->getStyle('A15:L15')->applyFromArray($border);
 			$this->excel->getActiveSheet()->setCellValue('A15', 'Sr #');
 			$this->excel->getActiveSheet()->getStyle('A15')->getFont()->setBold(true);
 			
@@ -193,26 +192,29 @@ class Grn extends CI_Controller {
 			$this->excel->getActiveSheet()->getStyle('D15')->getFont()->setBold(true);
 			$this->excel->getActiveSheet()->getColumnDimension('D')->setWidth("20");
 			
-			$this->excel->getActiveSheet()->setCellValue('E15', 'Challan Qty');
+			$this->excel->getActiveSheet()->setCellValue('E15', 'Supplier PO#');
 			$this->excel->getActiveSheet()->getStyle('E15')->getFont()->setBold(true);
 			
-			$this->excel->getActiveSheet()->setCellValue('F15', 'Received Qty');
+			$this->excel->getActiveSheet()->setCellValue('F15', 'Challan Qty');
 			$this->excel->getActiveSheet()->getStyle('F15')->getFont()->setBold(true);
 			
-			$this->excel->getActiveSheet()->setCellValue('G15', 'Accepted Qty');
+			$this->excel->getActiveSheet()->setCellValue('G15', 'Received Qty');
 			$this->excel->getActiveSheet()->getStyle('G15')->getFont()->setBold(true);
 			
-			$this->excel->getActiveSheet()->setCellValue('H15', 'Rejected Qty');
+			$this->excel->getActiveSheet()->setCellValue('H15', 'Accepted Qty');
 			$this->excel->getActiveSheet()->getStyle('H15')->getFont()->setBold(true);
 			
-			$this->excel->getActiveSheet()->setCellValue('I15', 'Difference Qty');
+			$this->excel->getActiveSheet()->setCellValue('I15', 'Rejected Qty');
 			$this->excel->getActiveSheet()->getStyle('I15')->getFont()->setBold(true);
 			
-			$this->excel->getActiveSheet()->setCellValue('J15', 'Stocked Qty');
+			$this->excel->getActiveSheet()->setCellValue('J15', 'Difference Qty');
 			$this->excel->getActiveSheet()->getStyle('J15')->getFont()->setBold(true);
 			
-			$this->excel->getActiveSheet()->setCellValue('K15', 'Remarks Qty');
+			$this->excel->getActiveSheet()->setCellValue('K15', 'Stocked Qty');
 			$this->excel->getActiveSheet()->getStyle('K15')->getFont()->setBold(true);
+			
+			$this->excel->getActiveSheet()->setCellValue('L15', 'Remarks Qty');
+			$this->excel->getActiveSheet()->getStyle('L15')->getFont()->setBold(true);
 			
 			$objDrawing = new PHPExcel_Worksheet_Drawing();
 			$objDrawing->setName('Logo');
@@ -243,7 +245,9 @@ class Grn extends CI_Controller {
 				
 				$diff_qty = $row['received_qty'] - $row['challan_qty'];
 				
-				$exceldata1[] = array('sno' => $i, 'item_code' => GetItemData( $row['item_id'] )->ITEM_CODE,'description' => GetItemData( $row['item_id'] )->ITEM_DESC, 'unit' => $itemUnitID, 'challan_qty' => $row['challan_qty'], 'received_qty' => $row['received_qty'], 'accepted_qty' => $row['accepted_qty'], 'rejected_qty' => $row['received_qty'] - $row['accepted_qty'], 'difference_qty' => $diff_qty, 'stocked_qty' => $GRNtoSTOCK, 'remarks' => $row['remarks']);
+				$spo_num = SPOData($row['supplier_po_id'])->po_num;
+				
+				$exceldata1[] = array('sno' => $i, 'item_code' => GetItemData( $row['item_id'] )->ITEM_CODE,'description' => GetItemData( $row['item_id'] )->ITEM_DESC, 'unit' => $itemUnitID, 'supplier_po'=> $spo_num, 'challan_qty' => $row['challan_qty'], 'received_qty' => $row['received_qty'], 'accepted_qty' => $row['accepted_qty'], 'rejected_qty' => $row['received_qty'] - $row['accepted_qty'], 'difference_qty' => $diff_qty, 'stocked_qty' => $GRNtoSTOCK, 'remarks' => $row['remarks']);
 				
 			$i++; $j++; }
 			
@@ -255,12 +259,12 @@ class Grn extends CI_Controller {
 			//Fill data 
 			$this->excel->getActiveSheet()->fromArray($exceldata1, null, 'A16');
 			
-			$this->excel->getActiveSheet()->getStyle('A15:K'.$x_row)->getAlignment()->setWrapText(true);
-			$this->excel->getActiveSheet()->getStyle('A15:K'.$x_row)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
-			$this->excel->getActiveSheet()->getStyle('A15:K'.$x_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-			$this->excel->getActiveSheet()->getStyle("A15:K".$x_row)->applyFromArray($allborder);
+			$this->excel->getActiveSheet()->getStyle('A15:L'.$x_row)->getAlignment()->setWrapText(true);
+			$this->excel->getActiveSheet()->getStyle('A15:L'.$x_row)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+			$this->excel->getActiveSheet()->getStyle('A15:L'.$x_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$this->excel->getActiveSheet()->getStyle("A15:L".$x_row)->applyFromArray($allborder);
 		 	
-		 	$this->excel->getActiveSheet()->getStyle('A16:K'.$x_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		 	$this->excel->getActiveSheet()->getStyle('A16:L'.$x_row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 			
 			$filename='GRN_'.$data['grn']->grn_number.'.xls'; //save our workbook as this file name
 			header('Content-Type: application/octet-stream'); //mime type
@@ -312,7 +316,8 @@ class Grn extends CI_Controller {
 				$data = array(
 					'grn_id' => time(),
 					'grn_number' => @$this->input->post('gn_no'),
-					'bill_id' => @$this->input->post('bill_id')
+					'bill_id' => @$this->input->post('bill_id'),
+					'created_by' => $created_by
 				);
 				
 				$result = $this->Admin_model->saveGrn($data);
@@ -416,6 +421,7 @@ class Grn extends CI_Controller {
 			{
 				$GrnItemData = array(
 					'grn_row_id' => @$this->input->post('grn_id'),
+					'supplier_po_id' => @$this->input->post('spo_id'),
 					'item_id' => @$this->input->post('item_id'),
 					'challan_qty' => @$this->input->post('challan_qty'),
 					'received_qty' => @$this->input->post('received_qty'),
@@ -477,8 +483,7 @@ class Grn extends CI_Controller {
 		
 		$data['title']='Edit Grn Item';
 		$data['suppliers']= GetAllSupplier();
-		//$data['items']= GetItem();
-		$data['grnrow']=$this->db->get_where('grn_item',array('id'=>$id))->row();
+		$data['itemrow']=$this->db->get_where('grn_item',array('id'=>$id))->row();
 		$data['msg']=$this->session->flashdata('msg');
 		$this->RedirectToPageWithData('grn/edit_grn_item',$data);
 	}
@@ -543,6 +548,26 @@ class Grn extends CI_Controller {
 				$this->session->set_flashdata('msg','<span class="text-green">Item added successfully.</span>');
 				redirect(base_url().'grn/view/'.$grnID);   // or whatever logic needs to occur	
 			}
+	}
+	
+	function Get_Bill_Item_QTY()
+	{
+		$item_id = $_POST['item_id'];
+		$bill_id = $_POST['bill_id'];
+		
+		$challan_qty = $this->db->get_where('bill_item',array('item_id'=>$item_id, 'bill_id'=>$bill_id ))->row();
+		
+		$po_num = SPOData($challan_qty->supplier_po_id)->po_num;
+		
+		$data['qty'] = $challan_qty->challan_qty;
+		$data['spo_id'] = $challan_qty->supplier_po_id;
+		$data['po_num'] = $po_num;
+		
+		//$data = array('qty'=>$challan_qty->challan_qty, 'spo_id'=> $challan_qty->supplier_po_id );
+		
+		$json_data = json_encode($data);
+		
+		echo $json_data;
 	}
 	
 }

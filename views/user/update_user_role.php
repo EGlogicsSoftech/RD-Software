@@ -140,6 +140,22 @@
 													</ul>
 												</li>
 												<li class="list-group-item">
+													<input <?php if (in_array("supplier_bill", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="supplier_bill"> <label>Supplier Bill</label><br> 
+													<ul class="list-group">
+                                            			<li class="list-group-item">
+															<input <?php if (in_array("add_bill", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="add_bill"> Add Bill<br>
+                                                            <input <?php if (in_array("all_bill", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="all_bill"> All Bill<br>
+                                                            <input <?php if (in_array("approve_bill", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="approve_bill"> Approve Bill<br>
+
+															<input <?php if (in_array("debit_note", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="debit_note"> Debit Note<br>
+															
+															<input <?php if (in_array("add_bill_item", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="add_bill_item"> Add Bill Item<br>
+															<input <?php if (in_array("remove_bill_item", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="remove_bill_item"> Remove Bill Item <br>
+															<input <?php if (in_array("update_bill_item", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="update_bill_item"> Update Bill Item<br>
+														</li>
+													</ul>
+												</li>
+												<li class="list-group-item">
 													<input <?php if (in_array("stock", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="stock"> <label>Stock</label><br> 
 													<ul class="list-group">
                                             			<li class="list-group-item">
@@ -195,6 +211,8 @@
                                                             <input <?php if (in_array("rep_supplier", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="rep_supplier"> Supplier<br>
                                                             <input <?php if (in_array("rep_statistical_raw", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="rep_statistical_raw"> Statistical Data ( Raw )<br>
 															<input <?php if (in_array("rep_statistical_finished", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="rep_statistical_finished"> Statistical Data ( Finished )<br>
+															<input <?php if (in_array("rep_item_pending", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="rep_item_pending"> Item Pending<br>
+															<input <?php if (in_array("rep_gst", $per_data)){ echo "checked"; } ?> type="checkbox" name="permission[]" value="rep_gst"> GST<br>
 														</li>
 													</ul>
 												</li>

@@ -198,6 +198,7 @@
 															$gross += $amount;
 															$item_img = GetItemData( $sup_po_item['item_id'] )->ITEM_IMAGE;
 															$itemUnitID = GetItemData( $sup_po_item['item_id'] )->ITEM_UNIT;
+															
 															$good_recived = GoodsRecived($supplier_po->sup_po_id, $sup_po_item['item_id']);
 													?>
 													<tr>

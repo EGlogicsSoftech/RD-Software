@@ -65,11 +65,14 @@
                                         <?php } ?>
                                         <div class="form-group col-md-4">
                                             <label>Items <span style="color:red;">*</span></label>
-                                            <select class="form-control" name="item" style="width:100%;">
-                                                <option value="">Select Items</option>
-                                                <?php foreach( $items as $item ) : ?>
+                                            <select class="form-control item-ajax" name="item" style="width:100%;">
+
+                                                <?php //foreach( $items as $item ) : ?>
+                                                    <option "selected" value ="<?php echo $activity->item_id; ?>"><?=GetItemData( $activity->item_id )->ITEM_CODE;?></option>
+                                                    <!--
                                                     <option <?php if( $item['ITEM_ID'] == $activity->item_id ) { echo "selected"; } ?> value="<?=$item['ITEM_ID'];?>"><?=GetItemData( $item['ITEM_ID'] )->ITEM_CODE;?></option>
-                                                <?php endforeach; ?>
+                                                     -->
+                                                <?php //endforeach; ?>
                                             </select>
                                             <?php echo form_error('item'); ?>
                                         </div>
@@ -79,7 +82,7 @@
                                             <input type="text" class="form-control" name="finsh_qty" value="<?php echo $activity->qty; ?>" placeholder="Finished Quantity" />
                                             <?php echo form_error('finsh_qty'); ?>
                                         </div>
-                                        
+
                                         <div class="form-group col-md-4">
                                         	<label>Alloted Worker <span style="color:red;">*</span></label>
                                             <input type="text" class="form-control" name="altd_worker" value="<?php echo $activity->altd_wrkr; ?>" placeholder="Alloted Worker" />
@@ -95,7 +98,7 @@
                                             </select>
                                             <?php echo form_error('shift'); ?>
                                         </div>
-										
+
                                         <div class="form-group col-md-3">
                                            	<label>Date <span style="color:red;">*</span></label>
                                             <div class='input-group date' id='startDate'>
@@ -104,10 +107,10 @@
                                                 <span class="input-group-addon add-on">
                                                     <span class="glyphicon glyphicon-calendar"></span>
                                                 </span>
-                                            </div>  
+                                            </div>
 											<?php echo form_error('date'); ?>
                                         </div>
-                                        
+
                                         <div class="form-group col-md-3">
                                          	<label>Status/Remark <span style="color:red;">*</span></label>
                                             <input type="text" class="form-control" name="stus_remark" value="<?php echo $activity->remarks; ?>" placeholder="Status/Remark" />
@@ -120,11 +123,11 @@
                                             <?php echo form_error('invoice'); ?>
                                         </div>
 
-                                        <div class="form-group col-md-12">    
+                                        <div class="form-group col-md-12">
                                             <input type="submit" class="btn btn-info" value="Update">
                                         </div>
-                                        <div style="clear:both;"></div> 
- 
+                                        <div style="clear:both;"></div>
+
                                     </form>
                                 </div><!-- /.box-body -->
                             </div><!-- /.box -->
@@ -143,10 +146,50 @@
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 		<script type="text/javascript" src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-datetimepicker.min.js"></script>
-       
+
         <script type="text/javascript">
 
-			$('select').select2();
+        $(".item-ajax").select2({
+
+          ajax: {
+                  // The number of milliseconds to wait for the user to stop typing before
+                  // issuing the ajax request.
+                  delay: 250,
+                  dataType: 'json',
+                  url: '<?php echo base_url('item/itemJson'); ?>',
+                  // You can pass custom data into the request based on the parameters used to
+                  // make the request. For `GET` requests, the default method, these are the
+                  // query parameters that are appended to the url. For `POST` requests, this
+                  // is the form data that will be passed into the request. For other requests,
+                  // the data returned from here should be customized based on what jQuery and
+                  // your server are expecting.
+                  //
+                  // @param params The object containing the parameters used to generate the
+                  //   request.
+                  // @returns Data to be directly passed into the request.
+                  data: function (params) {
+                    var queryParameters = {
+                      q: params.term
+                    }
+
+                    return queryParameters;
+                  },
+
+                  // @param data The data as it is returned directly by jQuery.
+                  // @returns An object containing the results data as well as any required
+                  //   metadata that is used by plugins. The object should contain an array of
+                  //   data objects as the `results` key.
+                  processResults: function (data) {
+                    return {
+                      results: data.result
+                    };
+                  },
+
+                },
+                placeholder: 'Search for item(s)',
+                minimumInputLength: 1,
+      });
+
 
             jQuery(function () {
                 jQuery('#startDate').datetimepicker({ format: 'dd/MM/yyyy' });

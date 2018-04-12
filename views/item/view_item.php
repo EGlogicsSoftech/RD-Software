@@ -95,6 +95,11 @@
                                             </tr>
                                             
                                             <tr>
+                                                <th style="width: 35%;">Manufacturing Timeframe</th>
+                                                <td><?php echo $item->MANUFACTURING_TIMEFRAME; ?></td>
+                                            </tr>
+                                            
+                                            <tr>
                                                 <th style="width: 35%;">Inner Box Size</th>
                                                 <td>
                                                 	<?php 

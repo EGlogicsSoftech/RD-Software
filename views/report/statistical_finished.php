@@ -109,6 +109,9 @@
                                             				
                                             				//$good_recived = GoodsRecived($item['sup_po_id'], $item['item_id']); 
                                             				
+                                            				$packings = Get_shipped_qty_of_Customer($cid, $item['item_id']);
+                                            				var_dump($packings);
+                                            				
                                             				if( GetItemData($item['item_id'])->CATEGORY_NAME == 12 )
                                             					{
                                             						continue;

@@ -58,15 +58,37 @@
 											<?php if( $bill->status == 2) : ?>
 												<a style="color:green;" href="/supplier_bill/approve_bill/<?php echo $bill->id; ?>" id="grn_approv">Click to Approve</a> 
 											<?php else : ?> 
-												<span style="color:green;">Approved</span> 
+												<span style="color:green;">Approved</span><?php if( is_UserAllowed('debit_note')){ ?> | <a style="color:green;" href="/supplier_bill/debit_note/<?php echo $bill->id; ?>">Debit Note</a><?php } ?>
 											<?php endif; ?>
 										<?php } ?>
 										
-										<!-- 
-<?php if( is_UserAllowed('approve_grn') && $billitems ){ echo "|"; }?>
+										<?php if( $billitems ) { ?> 
                                     	
-                                    	<?php if( $billitems ) { ?> <a style="color:orange;" href="/grn/Export_EXCEL/<?php echo $bill->bill_id; ?>">Export Excel</a> | <a style="color:orange;" href="/grn/Export_PDF/<?php echo $grn->grn_id; ?>">Export PDF</a> <?php } ?>
- -->
+                                    		<div class="btn-group">
+												<button disabled type="button" class="btn btn-warning btn-flat">PDF</button>
+												<button type="button" class="btn btn-warning btn-flat dropdown-toggle" data-toggle="dropdown">
+													<span class="caret"></span>
+													<span class="sr-only">Toggle Dropdown</span>
+												</button>
+												<ul class="dropdown-menu" role="menu">
+													<li><a href="/supplier_bill/Export_GRN_PDF/<?php echo $bill->bill_id; ?>">GRN</a></li>
+													<li><a href="/supplier_bill/Export_PDF/<?php echo $bill->bill_id; ?>">BILL</a></li>
+												</ul>
+											</div>
+										
+											<div class="btn-group">
+												<button disabled type="button" class="btn btn-warning btn-flat">Excel</button>
+												<button type="button" class="btn btn-warning btn-flat dropdown-toggle" data-toggle="dropdown">
+													<span class="caret"></span>
+													<span class="sr-only">Toggle Dropdown</span>
+												</button>
+												<ul class="dropdown-menu" role="menu">
+													<li><a href="/supplier_bill/Export_GRN_EXCEL/<?php echo $bill->bill_id; ?>">GRN</a></li>
+													<li><a href="/supplier_bill/Export_EXCEL/<?php echo $bill->bill_id; ?>">BILL</a></li>
+												</ul>
+											</div>
+                                    	<?php } ?>
+
                                     </div>
                                 </div>
                             	<div class="box-body table-responsive">
@@ -195,7 +217,7 @@
 						<div class="col-md-12">
                             <div class="box box-warning"> 
 								<div class="box-header">
-									<h3 class="box-title">GRN's Item</h3>
+									<h3 class="box-title">Items</h3>
 								</div>
 								
 								<div class="box-body table-responsive">
@@ -208,6 +230,8 @@
 													<th>Item Description</th>
 													<th>Unit</th>
 													<th>Challan Qty</th>
+													<th>Price</th>
+													<th>Amount</th>
 													<th>GST</th>
 													<!-- 
 <th>Accepted Qty</th>
@@ -215,50 +239,55 @@
 													<th>Diffrence Qty</th>
 													<th>Stocked Qty</th>
 													<th>Remarks</th>
-													<?php if( is_UserAllowed('update_grn_item') || is_UserAllowed('remove_grn_item') ){ ?>
-														<?php if( $grn->status == 2) : ?>
+ -->
+													<?php if( is_UserAllowed('update_bill_item') || is_UserAllowed('remove_bill_item') ){ ?>
+														<?php if( $bill->status == 2) : ?>
 															<th>Status</th>
 														<?php endif; ?>	
 													<?php } ?>
- -->
+
 												</tr>
 											</thead>
 											<tbody>    
 												<?php 	$i=1; 
-														foreach( $billitems as $billitems ) : 
-														
+														foreach( $billitems as $billitem ) : 
+														$price = $this->db->get_where('supplier_po_item',array('sup_po_id'=>$billitem['supplier_po_id'], 'item_id'=>$billitem['item_id']))->row('price'); 
 														//$GRNtoSTOCK = GRNtoSTOCK($grnItem['grn_row_id'], $grnItem['item_id']);
 												?>
 												<tr>
 													<td><?=$i;?></td>
-													<td><?php echo GetItemData( $billitems['item_id'] )->ITEM_CODE; ?></td>
-													<td><?php echo GetItemData( $billitems['item_id'] )->ITEM_DESC; ?></td>
-													<td><?php echo GetItemUnit( GetItemData( $billitems['item_id'] )->ITEM_UNIT); ?></td>
-													<td><?php echo $billitems['challan_qty']; ?></td>
-													<td><?php echo $billitems['gst']; ?></td>
-													
+													<td><?php echo GetItemData( $billitem['item_id'] )->ITEM_CODE; ?></td>
+													<td><?php echo GetItemData( $billitem['item_id'] )->ITEM_DESC; ?></td>
+													<td><?php echo GetItemUnit( GetItemData( $billitem['item_id'] )->ITEM_UNIT); ?></td>
+													<td><?php echo $billitem['challan_qty']; ?></td>
+													<td><?php echo $price; ?></td>
+													<td><?php echo $price * $billitem['challan_qty']; ?></td>
+													<td><?php echo $billitem['gst']; ?></td>
 													<!-- 
 <td><?php echo $grnItem['accepted_qty']; ?></td>
 													<td><?php echo $grnItem['received_qty'] - $grnItem['accepted_qty']; ?></td>
 													<td><?php echo $grnItem['received_qty'] - $grnItem['challan_qty']; ?></td>
 													<td <?php if( $grnItem['accepted_qty'] > $GRNtoSTOCK ) { echo 'class="uninvoiced_column_red"'; } ?> ><?php echo $GRNtoSTOCK; ?></td>
 													<td><?php echo $grnItem['remarks']; ?></td>
-													<?php if( is_UserAllowed('update_grn_item') || is_UserAllowed('remove_grn_item') ){ ?>
-														<?php if( $grn->status == 2) : ?>
+ -->
+													<?php if( is_UserAllowed('update_bill_item') || is_UserAllowed('remove_bill_item') ){ ?>
+														<?php if( $bill->status == 2) : ?>
 														<td>
 														
-															<?php if( is_UserAllowed('update_grn_item')){ ?>
-																<a style="color:orange;" href="<?=base_url('grn/editGrnItem/'.$grnItem['id']); ?>">Update</a> | 
+															<?php if( is_UserAllowed('update_bill_item')){ ?>
+																<a style="color:orange;" href="<?=base_url('supplier_bill/editBillItem/'.$billitem['id']); ?>">Update</a> 
 															<?php } ?>
 														
-															<?php if( is_UserAllowed('remove_grn_item')){ ?>
-																<a style="color:red;" class="remove_grn_item" rowid="<?php echo $grnItem['id']; ?>" href="#">Remove</a>
+															<!-- 
+<?php if( is_UserAllowed('remove_bill_item')){ ?>
+																<a style="color:red;" class="remove_bill_item" rowid="<?php echo $billitem['id']; ?>" href="#">Remove</a>
 															<?php } ?>
+ -->
 														
 														</td>
 														<?php endif; ?>
 													<?php } ?>
- -->
+
 												</tr>    
 												<?php $i++; endforeach; ?>
 											</tbody>

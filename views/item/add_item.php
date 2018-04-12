@@ -101,6 +101,12 @@
                                             </select>
                                             <?php echo form_error('supplier'); ?>
                                         </div>
+                                        
+                                        <div class="form-group col-md-6">
+                                            <label>Manufacturing Timeframe</label>
+                                            <input type="text" class="form-control" name="man_timeframe" placeholder="Manufacturing Timeframe" value="<?php echo $this->input->post('man_timeframe')?>" />
+                                            <?php echo form_error('man_timeframe'); ?>
+                                        </div>
 										
 										<div class="form-group col-md-6">
                                             <label>Country of Origin <span style="color:red;">*</span></label>

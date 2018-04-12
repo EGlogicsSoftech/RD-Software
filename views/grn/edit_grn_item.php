@@ -54,7 +54,7 @@
                                 <div class="box-body ab-class">
                                 
                                     <?php echo form_error('validate'); ?>
-                                    <form enctype="multipart/form-data" action="<?=base_url('grn/updateGrnItem/'.$grnrow->id); ?>" method="post">
+                                    <form enctype="multipart/form-data" action="<?=base_url('grn/updateGrnItem/'.$itemrow->id); ?>" method="post">
 
 										<?php if( $msg ) { ?>
 											<div class="" style="padding-bottom: 15px;">
@@ -63,13 +63,13 @@
 										<?php } ?>
 										
 										<div class="form-group">
-											<?php 	$grndata = $this->db->get_where('grn',array('grn_id'=>$grnrow->grn_row_id))->row();
-													$items = GetItemofSupplierPOItem($grndata->sup_po_num); ?>
+											<?php 	$grndata = $this->db->get_where('grn',array('grn_id'=>$itemrow->grn_row_id))->row();
+													$items = Get_Items_of_bill($grndata->bill_id); ?>
 											<label>Items</label>
 											<select class="form-control" name="item_id"  style="width:100%;">
 												<option value="">Select Item</option>
 												<?php foreach( $items as $item ) :  ?>
-													<option <?php if( $item['item_id'] == $grnrow->item_id ) { echo "selected"; } ?> value="<?=$item['item_id'];?>"><?=GetItemData( $item['item_id'] )->ITEM_CODE;?></option>
+													<option <?php if( $item['item_id'] == $itemrow->item_id ) { echo "selected"; } ?> value="<?=$item['item_id'];?>"><?=GetItemData( $item['item_id'] )->ITEM_CODE;?></option>
 												<?php endforeach; ?>
 											</select>
 											<?php echo form_error('item_id'); ?>
@@ -77,31 +77,31 @@
 
 										<div class="form-group">
 											<label>Challan Qty</label>
-											<input type="text" class="form-control" name="challan_qty" value="<?php echo $grnrow->challan_qty; ?>"/>
+											<input type="text" class="form-control" name="challan_qty" value="<?php echo $itemrow->challan_qty; ?>"/>
 											<?php echo form_error('challan_qty'); ?>
 										</div>
 
 										<div class="form-group">
 											<label>Received Qty</label>
-											<input type="text" class="form-control received_qty" name="received_qty" value="<?php echo $grnrow->received_qty; ?>" />
+											<input type="text" class="form-control received_qty" name="received_qty" value="<?php echo $itemrow->received_qty; ?>" />
 											<?php echo form_error('received_qty'); ?>
 										</div>
 
 										<div class="form-group">
 											<label>Accepted Qty</label>
-											<input type="text" class="form-control accepted_qty" onfocusout="rejectedQTY()" name="accepted_qty" value="<?php echo $grnrow->accepted_qty; ?>"/>
+											<input type="text" class="form-control accepted_qty" onfocusout="rejectedQTY()" name="accepted_qty" value="<?php echo $itemrow->accepted_qty; ?>"/>
 											<?php echo form_error('accepted_qty'); ?>
 										</div>
 										
 										<div class="form-group">
 											<label>Rejected Qty</label>
-											<input type="text" disabled class="form-control rejected_qty" name="rejected_qty" value="<?php echo $grnrow->received_qty - $grnrow->accepted_qty; ?>"/>
+											<input type="text" disabled class="form-control rejected_qty" name="rejected_qty" value="<?php echo $itemrow->received_qty - $itemrow->accepted_qty; ?>"/>
 											<?php echo form_error('rejected_qty'); ?>
 										</div>
 										
 										<div class="form-group">
 											<label>Remarks</label>
-											<textarea class="form-control" name="remarks" placeholder="Remarks Against Rejection"><?php echo $grnrow->remarks; ?></textarea>
+											<textarea class="form-control" name="remarks" placeholder="Remarks Against Rejection"><?php echo $itemrow->remarks; ?></textarea>
 											<?php echo form_error('remarks'); ?>
 										</div>
 										
