@@ -196,7 +196,19 @@
 
 															$amount = $sup_po_item['qty'] * $sup_po_item['price'];
 															$gross += $amount;
+															
 															$item_img = GetItemData( $sup_po_item['item_id'] )->ITEM_IMAGE;
+															
+															if( $item_img )
+																{
+																	$img_path = FCPATH.'uploads/item_images/'.$item_img;
+																}
+															else
+																{
+																	$img_path = '';
+																}
+															
+															
 															$itemUnitID = GetItemData( $sup_po_item['item_id'] )->ITEM_UNIT;
 															
 															$good_recived = GoodsRecived($supplier_po->sup_po_id, $sup_po_item['item_id']);
@@ -205,7 +217,7 @@
 														<td><?=$i;?></td>
 														<td>
 															<a href="/item/view/<?php echo GetItemData( $sup_po_item['item_id'] )->ID; ?>">
-																<?php if( $item_img ): ?>
+																<?php if( file_exists( $img_path ) ): ?>
 																	<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 																<?php else : ?>
 																	<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />

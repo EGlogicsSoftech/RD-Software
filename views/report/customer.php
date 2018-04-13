@@ -14,6 +14,7 @@
         <link href="<?=base_url();?>admin/css/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css" />
         <!-- Theme style -->
         <link href="<?=base_url();?>admin/css/AdminLTE.css" rel="stylesheet" type="text/css" />
+        <link href="<?=base_url();?>admin/css/custom_style.css" rel="stylesheet" type="text/css" />
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -56,10 +57,11 @@
 										<form action="#" method="POST">
 											
 											<div class="col-xs-3">
-												<select class="form-control sv_customer" name="customer">
+												<label> Customers</label>
+												<select class="form-control sv_customer" name="customer" required>
 													<option value="">Select Customer</option>
 
-													<?php foreach( $customer_list as $customer ) : ?>
+													<?php foreach( $customers as $customer ) : ?>
 														<option <?php if( $this->input->post('customer') == $customer['customer_id'] ){ echo "selected"; } ?> value="<?=$customer['customer_id'];?>"><?=$customer['name'];?></option>
 													<?php endforeach; ?>
 
@@ -67,7 +69,8 @@
 											</div>
 												
 											<div class="col-xs-3">
-												<select class="form-control customer_pi" name="customer_pi">
+												<label> Customer PI</label>
+												<select class="form-control customer_pi" name="customer_pi" required>
 													<option value="">Select Customer PI</option>
 													<?php if( $_POST['customer'] ){  
 													
@@ -91,17 +94,17 @@
                                 <div style="clear:both;"></div>
 
                                 <div class="box-body table-responsive">
-                                    <table id="example1" class="table table-bordered table-hover">
+                                    <table id="example1" class="table sv_table_heading table-bordered table-hover">
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Item#</th>
-                                                <th>Category</th>
-                                            	<th>RD Item#</th>
-                                            	<th>Customer Item#</th>
-                                                <th>Picture</th>
-                                                <th>Description</th>
-                                                <th>Unit</th>
+                                                <th class="nosort">Item#</th>
+                                                <th class="nosort">Category</th>
+                                            	<th class="nosort">RD Item#</th>
+                                            	<th class="nosort">Customer Item#</th>
+                                                <th class="nosort">Picture</th>
+                                                <th class="nosort">Description</th>
+                                                <th class="nosort">Unit</th>
                                                 <th>Order Qty</th>
                                                 <th>Shipped Qty</th>
                                                 <th>Balance</th>
@@ -120,6 +123,17 @@
 
                                             				$i=1; foreach( $items as $item ) : 
                                             				
+                                            				$item_img = GetItemData($item['item_id'])->ITEM_IMAGE;
+																
+															if( $item_img )
+																{
+																	$img_path = FCPATH.'uploads/item_images/'.$item_img;
+																}
+															else
+																{
+																	$img_path = '';
+																}
+                                            				
                                             				$shipped_qty = invoiced_quantity($item['cust_pi_id'], $item['item_id']);				
                                             ?>
 												<tr>
@@ -130,8 +144,8 @@
 													<td><?=GetItemData($item['item_id'])->ITEM_CODE;?></td>
 													<td><?php echo $item['customer_item_code']; ?></td>
 													<td>
-														<?php if( $item['ITEM_IMAGE'] ): ?>
-															<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo GetItemData($item['item_id'])->ITEM_IMAGE; ?>" />
+														<?php if( file_exists( $img_path ) ): ?>
+															<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 														<?php else : ?>
 															<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />
 														<?php endif; ?>
@@ -197,7 +211,11 @@
         <!-- page script -->
         <script type="text/javascript">
             $(function() {
-                $("#example1").dataTable();
+                $("#example1").dataTable({
+                	"aoColumnDefs": [
+						{ 'bSortable': false, 'aTargets': [ 'nosort' ] }
+					],
+                });
             });
             
             $(document).ready(function() {

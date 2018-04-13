@@ -76,7 +76,7 @@ class Item extends CI_Controller {
 		if( !is_UserAllowed('view_item')){ header('Location: '.base_url().'admin/dashboard'); }
 
 		$data['title']='View Item';
-		$data['items']= $this->db->get_where('item',array('status'=>'1', 'ITEM_ASSEMBLED'=>'0', 'CATEGORY_NAME'=>'8'))->result_array();
+		$data['items']= $this->db->get_where('item',array('status'=>'1', 'ITEM_ASSEMBLED'=>'0', 'CATEGORY_NAME'=>'12'))->result_array();
 		$data['item']=$this->db->get_where('item',array('ID'=>$id))->row();
 		$data['msg']=$this->session->flashdata('msg');
 		$this->RedirectToPageWithData('item/view_item',$data);
@@ -134,15 +134,26 @@ class Item extends CI_Controller {
 
 	function fetch_items()
 		{
-						$fetch_data = $this->Admin_model->make_datatables();
+			$fetch_data = $this->Admin_model->make_datatables();
            	$data = array();
            	$no = $_POST['start'];
 
            	foreach($fetch_data as $row)
            	{
+           		$item_img = $row->ITEM_IMAGE;
+           		
+           		if($item_img)
+           			{
+           				$img_path = FCPATH.'uploads/item_images/'.$item_img;
+           			}
+           		else
+           			{
+           				$img_path = '';
+           			}
+																
            		$no++;
-           		if( $row->ITEM_IMAGE ):
-					$image = "<a href=".base_url('item/view').'/'.$row->ID."><img style='width:100px' src=".base_url().'uploads/item_images/'.$row->ITEM_IMAGE." /></a>";
+           		if( file_exists( $img_path ) ):
+					$image = "<a href=".base_url('item/view').'/'.$row->ID."><img class='verma' style='width:100px' src=".base_url().'uploads/item_images/'.$item_img." /></a>";
 				else :
 					$image = "<a href=".base_url('item/view').'/'.$row->ID."><img style='width:100px' src='".base_url()."uploads/no-image-available.jpg' /></a>";
 				endif;

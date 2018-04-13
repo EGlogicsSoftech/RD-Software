@@ -862,8 +862,8 @@
 
 			$query = $ci->db->query('select B.qty from ( select grn_id from grn where status=1 ) AS A RIGHT JOIN ( select SUM(accepted_qty) as qty, grn_row_id from grn_item where supplier_po_id ='.$SPO_id.' AND item_id='.$item_id.' GROUP BY item_id) as B ON A.grn_id = B.grn_row_id');
 			$data = $query->row();
-
-			return $data->qty;
+			
+			if($data){ return $data->qty; }else{ return 0; }
 		}
 
 	function CheckStock()
@@ -883,8 +883,16 @@
 		    $ci->load->database();
 
 			$query = $ci->db->query('select A.item_id, A.SUMA , B.SUMB from ( select item_id , SUM(qty) as SUMA from stock_entry where item_id = '.$item_id.' group by item_id) AS A LEFT JOIN ( select item_id , SUM(qty) as SUMB from stock_issue_item where item_id = '.$item_id.' group by item_id) as B ON A.item_id = B.item_id');
-			$data = $query->row();
-
+			
+			if( $query->num_rows > 0)
+				{
+					$data = $query->row();
+				}
+			else
+				{
+					$data = NULL;
+				}
+			
 			return $data;
 		}
 
@@ -1049,16 +1057,16 @@
 			return $query;
 		}
 
-	function Purchased_Itemqty_of_Origin( $item_id )
-		{
-			$ci =& get_instance();
-		    $ci->load->database();
-
-			//$query = $ci->db->select_sum('qty')->get_where('supplier_po_item',array( 'item_id'=> $item_id ))->row('qty');
-			$query = $ci->db->query("SELECT SUM(qty) as sum FROM `supplier_po` as A,`supplier_po_item` as B WHERE A.sup_po_id = B.sup_po_id AND A.status = 1 AND B.item_id = $item_id")->result();
-
-			return $query[0]->sum;
-		}
+	// function Purchased_Itemqty_of_Origin( $item_id )
+// 		{
+// 			$ci =& get_instance();
+// 		    $ci->load->database();
+// 
+// 			//$query = $ci->db->select_sum('qty')->get_where('supplier_po_item',array( 'item_id'=> $item_id ))->row('qty');
+// 			$query = $ci->db->query("SELECT SUM(qty) as sum FROM `supplier_po` as A,`supplier_po_item` as B WHERE A.sup_po_id = B.sup_po_id AND A.status = 1 AND B.item_id = $item_id")->result();
+// 
+// 			return $query[0]->sum;
+// 		}
 
 	function Purchased_Items_by_customer( $cid )
 		{
@@ -1235,26 +1243,180 @@
 			return $data;
 
 		}
-		
-	function Get_shipped_qty_of_Customer($cid, $iid)
+	
+	// To Get The All Items Where This Sub Item is Used	
+	function Get_parent_items($item_id)
 		{
 			$ci =& get_instance();
 		    $ci->load->database();
 		    
-			$packings = $ci->db->get_where('packing_list',array('cust_id'=>$cid, 'status'=>1))->result_array();
+			$items = $ci->db->get_where('sub_item',array('item_id'=>$item_id))->result_array();
+			
+			return $items;
+		}	
+	
+	// Gets Sum of Invoiced Qty of Any Items	
+	function Get_item_invoiced_Qty($item_id)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+		    
+		    $packing_ids = Get_Approved_Invoice();
+		    
+		    // Get Invoiced Qty When this item is sold Alone
+			$query = $ci->db->query('SELECT SUM(qty) as qty FROM `packing_list_item` WHERE packing_id IN ('.$packing_ids.') AND item_id = '.$item_id.' group by item_id');
+			
+			if( $query->num_rows > 0)
+				{
+					$qty = $query->row()->qty;
+				}
+			else
+				{
+					$qty = 0;
+				}
+			
+			return $qty;
+		}
+		
+	function Get_Approved_Invoice()
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+		    
+			$packing_lists = $ci->db->get_where('packing_list',array('status'=>1))->result_array();
 			
 			$packing_ids = array_map (function($value){
                 return $value['packing_id'];
-            } , $packings);
+            } , $packing_lists);
+            
+            $packing_ids = implode(", ",$packing_ids);
 			
-			// $total_qty = 0;
-// 				
-// 			$query = $ci->db->query('SELECT SUM(qty) as qty FROM `packing_list_item` WHERE packing_id IN '.$packing_ids.' AND item_id = '.$iid.' group by item_id');
-// 			$data = $query->row();
-// 			
 			return $packing_ids;
+		}
+	
+	// Get Sub-Item Qty Used in Parent/Assembled Item	
+	function Get_Sub_Item_Qty($parent, $sub)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();
+		    
+			$qty = $ci->db->get_where('sub_item',array('PARENT_ITEM_ID'=>$parent, 'ITEM_ID'=>$sub))->row('QUANTITY');
 			
+			return $qty;
 		}	
+	
+	// Get Sub-Item/Raw Items Invoiced/Packing Qty	
+	function Get_RawItems_Invoiced_Qty($item_id)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();	
+		    
+		    // Get Invoiced Qty When this item is sold Alone
+		    $qty_sold_alone = Get_item_invoiced_Qty($item_id);
+		    
+		    $packing_ids = Get_Approved_Invoice();
+		    
+		    $items = Get_parent_items($item_id);
+		    
+		    $parent_item_ids = array_map (function($value){
+                return $value['PARENT_ITEM_ID'];
+            } , $items);
+            
+            $parent_item_ids = implode(", ",$parent_item_ids);
+            
+            // Get Invoiced Qty When this item is sold With Parent Item
+			$query = $ci->db->query('SELECT qty, item_id FROM `packing_list_item` WHERE packing_id IN ('.$packing_ids.') AND item_id IN ('.$parent_item_ids.')');
+			
+			if( $query )
+				{
+					$rows = $query->result_array();
+				}
+			else
+				{
+					$rows = '';
+				}
+			
+            $total_qty = 0;
+            
+            if( $rows )
+            	{   
+					// Find Sum of Quantity Invoiced With Parent Item            
+					foreach($rows as $row)
+						{
+							$parent_qty = $row['qty'];
+					
+							$sub_qty_in_parent = Get_Sub_Item_Qty($row['item_id'], $item_id);
+					
+							$total_qty += $parent_qty*$sub_qty_in_parent;
+						}
+						
+						
+				}
+				
+			$total_qty += $qty_sold_alone;
+				
+            return $total_qty;
+		}
 
+	function Get_Total_Order_of_sub_item($item_id)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();	
+		    
+		    // Get total Ordered Qty When this item is ordered Alone
+		    $qty_orderd_alone = Get_Total_Order($item_id);
+		    
+		    $approved_cpi_array = Get_Approved_CPI();
+			$approved_cpi = implode(", ",$approved_cpi_array);
+			
+			$items = Get_parent_items($item_id);
+		    $parent_item_ids = array_map (function($value){
+                return $value['PARENT_ITEM_ID'];
+            } , $items);
+            $parent_item_ids = implode(", ",$parent_item_ids);
+            
+			// Select all CPI with this item
+		 	$all_cpi = $ci->db->query('select * FROM customer_pi_item WHERE item_id IN ($parent_item_ids) AND cust_pi_id IN ($approved_cpi)');
+		 	
+		 	$total = 0;
+		 
+			if( $all_cpi )
+				{		 
+					foreach ($all_cpi->result() as $cpi)
+						{
+							$CPI_ID = $cpi->cust_pi_id;
+							$orderd = $cpi->qty;
+							$total += $orderd; // Add all the order qty
+						}
+				}
+			
+			$total += $qty_orderd_alone;
+			
+		 return $total;
 
+		}
+		
+	
+	// Sum of Invoiced Qty of an Item by Customer
+	function Get_Customer_Item_Invoiced_Qty($item_id, $cid)
+		{
+			$ci =& get_instance();
+		    $ci->load->database();	
+		    
+		    $packing_ids = Get_Approved_Invoice();
+		    
+		    $query = $ci->db->query('SELECT SUM(qty) as qty FROM `packing_list_item` WHERE packing_id IN ($packing_ids) AND item_id = $item_id AND customer_id = $cid group by item_id');
+			
+			if( $query )
+				{
+					$qty = $query->row()->qty;
+				}
+			else
+				{
+					$qty = 0;
+				}
+			
+            return $qty;
+		    
+		}
 ?>

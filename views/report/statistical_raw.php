@@ -14,6 +14,7 @@
         <link href="<?=base_url();?>admin/css/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css" />
         <!-- Theme style -->
         <link href="<?=base_url();?>admin/css/AdminLTE.css" rel="stylesheet" type="text/css" />
+        <link href="<?=base_url();?>admin/css/custom_style.css" rel="stylesheet" type="text/css" />
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -56,7 +57,8 @@
 										<form action="#" method="POST">
 											
 											<div class="col-xs-3">
-												<select class="form-control sv_country" name="country">
+												<label> Country Of Origin</label>
+												<select class="form-control sv_country" name="country" required>
 													<option value="">Select Country of Origin</option>
 										
 													<?php foreach( $countries as $country ) : ?>
@@ -76,18 +78,18 @@
                                 <div style="clear:both;"></div>
                                 
                                 <div class="box-body table-responsive">
-                                    <table id="example1" class="table table-bordered table-hover">
+                                    <table id="example1" class="table sv_table_heading table-bordered table-hover">
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Item Code#</th>
-                                                <th>Picture</th>
-                                                <th>Description</th>
-                                                <th>Unit</th>
-                                                <th>Price</th>
+                                                <th class="nosort">Item Code#</th>
+                                                <th class="nosort">Picture</th>
+                                                <th class="nosort">Description</th>
+                                                <th class="nosort">Unit</th>
+                                                <th class="nosort">Price</th>
                                                 <th>Purchase Qty</th>
+                                                <th>Total Order</th>
                                                 <th>Shipped Qty</th>
-                                                <th>Order in Hand</th>
                                                 <th>Balance Qty</th>
                                                 <th>Stock Value</th>
                                                 <th>Required Qty</th>
@@ -99,18 +101,53 @@
                                             				$country = $_POST['country'];
                                             				
                                             				$items = $this->db->get_where('item',array('COUNTRY_ID'=> $country, 'CATEGORY_NAME'=> 12, 'STATUS'=> 1))->result_array();
-                                            				
+                                            			}
+                                            		else
+                                            			{
+                                            				$items = $this->db->get_where('item',array('CATEGORY_NAME'=> 12, 'STATUS'=> 1))->result_array();
+                                            			}		
                                             				$i=1; foreach( $items as $item ) : 
                                             				
                                             				$item_img = GetItemData($item['ITEM_ID'])->ITEM_IMAGE;
-															$img_path = '/var/www/html/uploads/item_images/'.$item_img;
+                                            				
+															if( $item_img )
+                                            					{
+                                            						$img_path = FCPATH.'uploads/item_images/'.$item_img;
+                                            					}
+                                            				else
+                                            					{
+                                            						$img_path = '';
+                                            					}
+                                            					
+                                            				$balance = Get_Total_Order_of_sub_item($item['ITEM_ID']) - Get_RawItems_Invoiced_Qty($item['ITEM_ID']);	
+                                            					
+                                            				$stock = CheckStockbyItem($item['ITEM_ID']);
+                                            				
+                                            				$total_stock = 0;
+                                            				
+                                            				if( $stock )
+                                            					{
+                                            						
+                                            						$total_stock_entry = $stock->SUMA;
+                                            						
+                                            						if( $stock->SUMB == NULL )
+																		{
+																			$total_stock_issue = 0;
+																		}
+																	else
+																		{
+																			$total_stock_issue = $stock->SUMB;
+																		}
+																		
+																	$total_stock = 	$total_stock_entry - $total_stock_issue;
+                                            					}
                                             		?>
 												<tr>
 												
 													<td><?php echo $i; ?></td>
 													<td><?=GetItemData($item['ITEM_ID'])->ITEM_CODE;?></td>
 													<td>
-														<?php if( $item_img ): ?>
+														<?php if( file_exists( $img_path ) ): ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 															<?php else : ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />
@@ -118,16 +155,16 @@
 													</td>
 													<td><?=GetItemData($item['ITEM_ID'])->ITEM_DESC;?></td>
 													<td><?=GetItemUnit( GetItemData($item['ITEM_ID'])->ITEM_UNIT );?></td>
-													<td>Price</td>
-													<td><?=Purchased_Itemqty_of_Origin($item['ITEM_ID']); ?></td>
-													<td>Shipped Qty</td>
-													<td>Order in Hand</td>
-													<td>Balance Qty</td>
-													<td>Stock Value</td>
-													<td>Required Qty</td>
+													<td><?=GetItemData($item['ITEM_ID'])->PURCHASE_PRICE ?></td>
+													<td><?=Get_Total_SPO_QTY($item['ITEM_ID']); ?></td>
+													<td><?=Get_Total_Order_of_sub_item($item['ITEM_ID']); ?></td>
+													<td><?=Get_RawItems_Invoiced_Qty($item['ITEM_ID']); ?></td>
+													<td><?=$balance; ?></td>
+													<td><?=$total_stock; ?></td>
+													<td><?=$balance - $total_stock; ?></td>
 													
 												</tr>   
-                                            <?php $i++; endforeach; } ?>
+                                            <?php $i++; endforeach; ?>
                                         </tbody>
                                         <tfoot>
                                             <tr>
@@ -138,8 +175,8 @@
                                                 <th>Unit</th>
                                                 <th>Price</th>
                                                 <th>Purchase Qty</th>
+                                                <th>Total Order</th>
                                                 <th>Shipped Qty</th>
-                                                <th>Order in Hand</th>
                                                 <th>Balance Qty</th>
                                                 <th>Stock Value</th>
                                                 <th>Required Qty</th>
@@ -178,7 +215,11 @@
         <!-- page script -->
         <script type="text/javascript">
             $(function() {
-                $("#example1").dataTable();
+                $("#example1").dataTable({
+                	"aoColumnDefs": [
+						{ 'bSortable': false, 'aTargets': [ 'nosort' ] }
+					],
+                });
             });
             
             $(document).ready(function() {

@@ -191,13 +191,22 @@
 											<tbody>    
 												<?php 	$i=1; 
 														foreach( $issueItems as $issueItem ) : 
-														$item_img = GetItemData( $issueItem['item_id'] )->ITEM_IMAGE;
+															$item_img = GetItemData( $issueItem['item_id'] )->ITEM_IMAGE;
+															
+															if( $item_img )
+																{
+																	$img_path = FCPATH.'uploads/item_images/'.$item_img;
+																}
+															else
+																{
+																	$img_path = '';
+																}
 												?>
 												<tr>
 													<td><?=$i;?></td>
 													<td>
 														<a href="/item/view/<?php echo GetItemData( $issueItem['item_id'] )->ID; ?>">
-															<?php if( $item_img ): ?>
+															<?php if( file_exists( $img_path ) ): ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 															<?php else : ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />

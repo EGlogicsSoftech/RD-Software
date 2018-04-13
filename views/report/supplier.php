@@ -14,6 +14,7 @@
         <link href="<?=base_url();?>admin/css/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css" />
         <!-- Theme style -->
         <link href="<?=base_url();?>admin/css/AdminLTE.css" rel="stylesheet" type="text/css" />
+        <link href="<?=base_url();?>admin/css/custom_style.css" rel="stylesheet" type="text/css" />
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -56,7 +57,8 @@
 										<form action="#" method="POST">
 											
 											<div class="col-xs-3">
-												<select class="form-control sv_supplier" name="supplier">
+												<label> Suppliers</label>
+												<select class="form-control sv_supplier" name="supplier" required>
 													<option value="">Select Supplier</option>
 										
 													<?php foreach( $suppliers as $supplier ) : ?>
@@ -67,7 +69,8 @@
 											</div>
 												
 											<div class="col-xs-3">
-												<select class="form-control supplier_po" name="supplier_po">
+												<label> Supplier PO</label>
+												<select class="form-control supplier_po" name="supplier_po" required>
 													<option value="">Select Supplier PO</option>
 													<?php if( $_POST['supplier'] ){  
 													
@@ -91,16 +94,16 @@
                                 <div style="clear:both;"></div>
                                 
                                 <div class="box-body table-responsive">
-                                    <table id="example1" class="table table-bordered table-hover">
+                                    <table id="example1" class="table sv_table_heading table-bordered table-hover">
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Item ID#</th>
-                                                <th>Category</th>
-                                                <th>RD Item#</th>
-                                                <th>Picture</th>
-                                                <th>Description</th>
-                                                <th>Unit</th>
+                                                <th class="nosort">Item ID#</th>
+                                                <th class="nosort">Category</th>
+                                                <th class="nosort">RD Item#</th>
+                                                <th class="nosort">Picture</th>
+                                                <th class="nosort">Description</th>
+                                                <th class="nosort">Unit</th>
                                                 <th>Order Quantity</th>
                                                 <th>Recived Quantity</th>
                                                 <th>Balance</th>
@@ -114,14 +117,22 @@
                                             				$spo_id = $_POST['supplier_po'];
                                             				$items = GetItemofSupplierPOItem($spo_id);
                                             				
-                                            				$spo = GetApprovedSPO($sid);
+                                            				$spo = GetApprovedSPO($spo_id);
                                             				
                                             				$i=1; foreach( $items as $item ) : 
                                             				
                                             				$good_recived = GoodsRecived($item['sup_po_id'], $item['item_id']); 
                                             				
                                             				$item_img = GetItemData($item['item_id'])->ITEM_IMAGE;
-															$img_path = '/var/www/html/uploads/item_images/'.$item_img;
+                                            				
+                                            				if( $item_img )
+                                            					{
+                                            						$img_path = FCPATH.'uploads/item_images/'.$item_img;
+                                            					}
+                                            				else
+                                            					{
+                                            						$img_path = '';
+                                            					}
                                             		?>
 												<tr> 
 												
@@ -130,7 +141,7 @@
 													<td><?=Get_Item_Category_Name(GetItemData($item['item_id'])->CATEGORY_NAME);?></td>
 													<td><?=GetItemData($item['item_id'])->ITEM_CODE;?></td>
 													<td>
-														<?php if( $item_img ): ?>
+														<?php if( file_exists( $img_path ) ): ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 															<?php else : ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />
@@ -196,7 +207,11 @@
         <!-- page script -->
         <script type="text/javascript">
             $(function() {
-                $("#example1").dataTable();
+                $("#example1").dataTable({
+                	"aoColumnDefs": [
+						{ 'bSortable': false, 'aTargets': [ 'nosort' ] }
+					],
+                });
             });
             
             $(document).ready(function() {

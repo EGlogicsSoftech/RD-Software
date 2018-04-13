@@ -502,9 +502,10 @@ class Supplier_bill extends CI_Controller {
 		$created_by = $this->db->get_where('login',array('id'=>$this->session->userdata('id')))->row('id'); 
 
 		$timestamp = $this->input->post('challan_date');
-		//$date1 = strtr($timestamp, '/', '-');
-		//date_default_timezone_set("Asia/Calcutta");
-		//$challan_date = date('Y-m-d', strtotime($date1));
+		$date1 = strtr($timestamp, '/', '-');
+		date_default_timezone_set("Asia/Calcutta");
+		$challan_date = date('Y-m-d', strtotime($date1));
+		
 		$grn_status = 0;
 		
 		$this->form_validation->set_error_delimiters('<p class="text-red">', '</p>');
@@ -551,7 +552,7 @@ class Supplier_bill extends CI_Controller {
 					'bill_id' => time(),
 					'sup_id' => @$this->input->post('supplier_id'),
 					'challan_num' => @$this->input->post('challan_no'),
-					'challan_date' => @$timestamp,
+					'challan_date' => @$challan_date,
 					'challan_img' => @$uploadedImageName,
 					'num_of_box' => @$this->input->post('box_no'),
 					'created_by' => $created_by

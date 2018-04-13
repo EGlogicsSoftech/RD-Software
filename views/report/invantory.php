@@ -64,13 +64,13 @@
 												<thead>
 													<tr>
 														<th>S.No</th>
-                            							<th>Category</th>
-                            							<th>Supplier ID</th>
-														<th>Item Code</th>
-														<th>Item Image</th>
-                            							<th>Description</th>
-                            							<th>Unit</th>
-                            							<th>Price</th>
+                            							<th class="nosort">Category</th>
+                            							<th class="nosort">Supplier ID</th>
+														<th class="nosort">Item Code</th>
+														<th class="nosort">Item Image</th>
+                            							<th class="nosort">Description</th>
+                            							<th class="nosort">Unit</th>
+                            							<th class="nosort">Purchase Price Code</th>
 														<th>Quantity in Stock</th>
                             							<th>Order in Hand</th>
                             							<th>Pending Supplier Order</th>
@@ -83,7 +83,7 @@
 															if($Stock['SUMA']-$Stock['SUMB'] >=1 ) :
                               								$item_data = GetItemData( $Stock['item_id'] );
 															$item_img = $item_data->ITEM_IMAGE;
-															$img_path = '/var/www/html/uploads/item_images/'.$item_img;
+															$img_path = FCPATH.'uploads/item_images/'.$item_img;
 													?>
 													<tr>
 														<td><?=$j;?></td>
@@ -137,6 +137,9 @@
 					"aLengthMenu": [
 						[50, 100, 200, -1],
 						[50, 100, 200, "All"]
+					],
+					"aoColumnDefs": [
+						{ 'bSortable': false, 'aTargets': [ 'nosort' ] }
 					],
 					"iDisplayLength" : 50
 				});

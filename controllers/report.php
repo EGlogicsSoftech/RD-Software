@@ -96,15 +96,16 @@ class Report extends CI_Controller {
 			if( !is_UserAllowed('rep_customer')){ header('Location: '.base_url().'admin/dashboard'); }
 			
 			$data['title']='CUSTOMER ORDER REPORTS';
-			$customers = $_POST['customer'];
-			//var_dump($customers);
-			//die();
-			$this->db->where('status','1');
-			if(!empty($customers))
-			{
-				$this->db->where_in('customer_id',$customers);
-			}
-			$data['customer_list'] = $this->db->query("select * FROM customer WHERE status = 1")->result_array();
+			
+			// $customers = $_POST['customer'];
+// 			//var_dump($customers);
+// 			//die();
+// 			$this->db->where('status','1');
+// 			if(!empty($customers))
+// 			{
+// 				$this->db->where_in('customer_id',$customers);
+// 			}
+			//$data['customer_list'] = $this->db->query("select * FROM customer WHERE status = 1")->result_array();
 			$data['customers'] = $this->db->get_where('customer',array('status'=>'1'))->result_array();
 			$this->RedirectToPageWithData('report/customer',$data);
 		}

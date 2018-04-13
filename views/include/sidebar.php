@@ -125,7 +125,9 @@
 						<?php } ?>
 						
 						<?php if( is_UserAllowed('all_bill')){ ?>
-							<li><a href="<?=base_url('supplier_bill/all_bills');?>"><i class="fa fa-angle-double-right"></i> All Bills</a></li>
+							<li class="<?php if($this->uri->segment(2)=="all_bills"){echo "active";}?>">
+								<a href="<?=base_url('supplier_bill/all_bills');?>"><i class="fa fa-angle-double-right"></i> All Bills</a>
+							</li>
 						<?php } ?>	
 					
 					</ul>
@@ -136,7 +138,7 @@
 				<li class="treeview <?php if($this->uri->segment(1)=="customer"){echo "active";}?>">
 					<a href="#">
 						<i class="fa fa-bar-chart-o"></i>
-						<span>Customer</span>
+							<span>Customer</span>
 						<i class="fa fa-angle-left pull-right"></i>
 					</a>
 					<ul class="treeview-menu">
@@ -148,13 +150,13 @@
 						<?php } ?>
 						
 						<?php if( is_UserAllowed('all_customer')){ ?>
-							<li class="<?php if($this->uri->segment(2)=="all_customer"){echo "active";}?>">
+							<li class="<?php if($this->uri->segment(2)=="all_list"){echo "active";}?>">
 								<a href="<?=base_url('customer/all_list');?>"><i class="fa fa-angle-double-right"></i> All Customers</a>
 							</li>
 						<?php } ?>	
 					
 						<?php if( is_UserAllowed('add_cpi')){ ?>
-							<li class="<?php if($this->uri->segment(2)=="add"){echo "active";}?>">
+							<li class="<?php if($this->uri->segment(2)=="add_customer_pi"){echo "active";}?>">
 								<a href="<?=base_url('customer/add_customer_pi');?>"><i class="fa fa-angle-double-right"></i> Add Customer P.I</a>
 							</li>
 						<?php } ?>
@@ -185,7 +187,9 @@
 						<?php } ?>
 						
 						<?php if( is_UserAllowed('all_grn')){ ?>
-							<li><a href="<?=base_url('grn/grnlist');?>"><i class="fa fa-angle-double-right"></i> All GRNs</a></li>
+							<li class="<?php if($this->uri->segment(2)=="grnlist"){echo "active";}?>">
+								<a href="<?=base_url('grn/grnlist');?>"><i class="fa fa-angle-double-right"></i> All GRNs</a>
+							</li>
 						<?php } ?>	
 					
 					</ul>
@@ -203,7 +207,9 @@
 					<ul class="treeview-menu">
 				
 						<?php if( is_UserAllowed('add_se')){ ?>
-							<li class="<?php if($this->uri->segment(2)=="add_entry"){echo "active";}?>"><a href="<?=base_url('stock/add_entry');?>"><i class="fa fa-angle-double-right"></i> Add Stock Entry</a></li>
+							<li class="<?php if($this->uri->segment(2)=="add_entry"){echo "active";}?>">
+								<a href="<?=base_url('stock/add_entry');?>"><i class="fa fa-angle-double-right"></i> Add Stock Entry</a>
+							</li>
 						<?php } ?>
 						
 						<?php if( is_UserAllowed('all_se')){ ?>
@@ -316,7 +322,7 @@
 					</a>
 					<ul class="treeview-menu">
 						<?php if( is_UserAllowed('rep_inventory')){ ?>
-							<li class="<?php if($this->uri->segment(2)=="invantory"){echo "active";}?>"><a href="<?=base_url('report/invantory');?>"><i class="fa fa-angle-double-right"></i> Invantory</a></li>
+							<li class="<?php if($this->uri->segment(2)=="invantory"){echo "active";}?>"><a href="<?=base_url('report/invantory');?>"><i class="fa fa-angle-double-right"></i> Inventory</a></li>
 						<?php } ?>
 
 						<?php if( is_UserAllowed('rep_customer')){ ?>
@@ -385,10 +391,10 @@
 						<i class="fa fa-angle-left pull-right"></i>
 					</a>
 					<ul class="treeview-menu">
-						<li class="<?php if($this->uri->segment(2)=="add_user_role"){echo "active";}?>">
+						<li class="<?php if($this->uri->segment(2)=="import"){echo "active";}?>">
 							<a href="<?=base_url('impexport/import');?>"><i class="fa fa-angle-double-right"></i> Import</a>
 						</li>
-						<li class="<?php if($this->uri->segment(2)=="user"){echo "active";}?>">
+						<li class="<?php if($this->uri->segment(2)=="export"){echo "active";}?>">
 							<a href="<?=base_url('impexport/export');?>"><i class="fa fa-angle-double-right"></i> Export</a>
 						</li>
 					</ul>

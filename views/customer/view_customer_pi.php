@@ -266,11 +266,23 @@
 															foreach( $cust_pi_items as $cust_pi_item ) :
 
 															$amount = $cust_pi_item['qty'] * $cust_pi_item['price'];
+															
 															$item_img = GetItemData( $cust_pi_item['item_id'] )->ITEM_IMAGE;
+															
+															if( $item_img )
+																{
+																	$img_path = FCPATH.'uploads/item_images/'.$item_img;
+																}
+															else
+																{
+																	$img_path = '';
+																}
+															
 															$itemUnitID = GetItemData( $cust_pi_item['item_id'] )->ITEM_UNIT;
 															$invoiced_quantity = invoiced_quantity($cust_pi_item['cust_pi_id'], $cust_pi_item['item_id']);
 															$QtyMstrBox = GetItemData( $cust_pi_item['item_id'] )->OUTER_BOX_QTY;
 															$outerBoxCBM = GetOuterBoxData( GetItemData( $cust_pi_item['item_id'] )->OUTER_BOX )->CBM;
+															
 															$outerBoxQty = ($QtyMstrBox == 0 ? 0 : ceil($cust_pi_item['qty'] / $QtyMstrBox));
 															$totalCBM += $outerBoxQty * $outerBoxCBM;
 													?>
@@ -278,7 +290,7 @@
 														<td><?=$i;?></td>
 														<td>
 															<a href="/item/view/<?php echo GetItemData( $cust_pi_item['item_id'] )->ID; ?>">
-																<?php if( $item_img ): ?>
+																<?php if( file_exists( $img_path ) ): ?>
 																	<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 																<?php else : ?>
 																	<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />

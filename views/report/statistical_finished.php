@@ -107,11 +107,7 @@
                                             				
                                             				foreach( $items as $item ) : 
                                             				
-                                            				//$good_recived = GoodsRecived($item['sup_po_id'], $item['item_id']); 
-                                            				
-                                            				$packings = Get_shipped_qty_of_Customer($cid, $item['item_id']);
-                                            				var_dump($packings);
-                                            				
+                                            				// Exclude Raw Items
                                             				if( GetItemData($item['item_id'])->CATEGORY_NAME == 12 )
                                             					{
                                             						continue;
@@ -120,7 +116,15 @@
                                             				//$customer_item = getPreviousCPIdata($cid, $item['item_id']);
                                             				
                                             				$item_img = GetItemData($item['item_id'])->ITEM_IMAGE;
-															$img_path = '/var/www/html/uploads/item_images/'.$item_img;
+															
+															if( $item_img )
+                                            					{
+                                            						$img_path = FCPATH.'uploads/item_images/'.$item_img;
+                                            					}
+                                            				else
+                                            					{
+                                            						$img_path = '';
+                                            					}
                                             		?>
 												<tr>
 												
@@ -128,7 +132,7 @@
 													<td><?=GetItemData($item['item_id'])->ITEM_CODE;?></td>
 													<td>Customer Item#</td>
 													<td>
-														<?php if( $item_img ): ?>
+														<?php if( file_exists( $img_path ) ): ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 															<?php else : ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />
@@ -136,10 +140,10 @@
 													</td>
 													<td><?=GetItemData($item['item_id'])->ITEM_DESC;?></td>
 													<td><?=GetItemUnit( GetItemData($item['item_id'])->ITEM_UNIT );?></td>
-													<td>Price</td>
+													<td><?=GetItemData($item['item_id'])->PURCHASE_PRICE;?></td>
 													<td><?=$item['qty'];?></td>
-													<td>Shipped</td>
-													<td>In hand</td>
+													<td><?=Get_Customer_Item_Invoiced_Qty($item['item_id'], $cid); ?></td>
+													<td><?=$item['qty'] - Get_Customer_Item_Invoiced_Qty($item['item_id'], $cid) ;?></td>
 													<!-- 
 <td><?=$item['price'];?></td>
 													<td><?=$item['qty'] * $item['price'];?></td>

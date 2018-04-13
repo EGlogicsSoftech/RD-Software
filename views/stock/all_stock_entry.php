@@ -63,10 +63,12 @@
                                         </thead>
                                         <tbody>
                                             
-                                            <?php $i = 1; foreach( array_reverse( $stock_entries ) as $stock_entry ) : ?>
+                                            <?php $i = 1; foreach( array_reverse( $stock_entries ) as $stock_entry ) : 
+                                            		$grn_no = GetGRNno( $stock_entry['grn_row_id'] );
+                                            ?>
                                                 <tr>
                                                     <td><?=$i;?></td>
-                                                    <td><?=GetGRNno( $stock_entry['grn_row_id'] );?></td>
+                                                    <td><?php if( $grn_no ){ echo $grn_no; } else { echo '0'; } ?></td>
                                                     <td><?=GetSupplierData( GetItemData( $stock_entry['item_id'])->SUPPLIER_ID )->supplier_name;?></td>
                                                     <td><?=$stock_entry['box_num'];?></td>
                                                     <td><?=GetItemData( $stock_entry['item_id'] )->ITEM_CODE;?></td>

@@ -89,6 +89,7 @@
                                             <tr>
                                                 <th>ID</th>
                                                 <th>Challan No#</th>
+                                                <th>Challan Date</th>
                                                 <th class="nosort">Total</th>
                                                 <th class="nosort">GST</th>
                                                 <th class="nosort">Return Amount</th>
@@ -127,6 +128,7 @@
 											<tr>
 												<td><?php echo $i; ?></td>
 												<td><?=$sup_bill['challan_num'];?></td>
+												<td><?=$sup_bill['challan_date'];?></td>
 												<td><?= $sv_data['total'];?></td>
 												<td><?=Get_Total_GST_of_BILL($sup_bill['bill_id']);?></td>
 												<td><?= $sv_data['price']; ?></td>

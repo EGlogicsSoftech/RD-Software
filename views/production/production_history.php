@@ -69,12 +69,21 @@
 											<?php $i=1; foreach( $histories as $history )
 												{
 													$item_img = GetItemData( $history['item_id'] )->ITEM_IMAGE;
+													
+													if( $item_img )
+														{
+															$img_path = FCPATH.'uploads/item_images/'.$item_img;
+														}
+													else
+														{
+															$img_path = '';
+														}
 											?>
 											<tr>
 												<td><?=$i;?></td>
 												<td><?php echo CPIdata( $history['cpi_id'] )->pi_num; ?></td>
 												<td>
-													<?php if( $item_img ): ?>
+													<?php if( file_exists( $img_path ) ): ?>
 														<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 													<?php else : ?>
 														<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />

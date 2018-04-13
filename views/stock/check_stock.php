@@ -79,8 +79,18 @@
 													<?php 	$i=1;
 															foreach( $CheckStock as $Stock ) :
 															if($Stock['SUMA']-$Stock['SUMB'] >=1 ) :
-                              $item_data = GetItemData( $Stock['item_id'] );
-															$item_img = $item_data->ITEM_IMAGE;
+                              									$item_data = GetItemData( $Stock['item_id'] );
+                              									
+																$item_img = $item_data->ITEM_IMAGE;
+																
+																if( $item_img )
+																	{
+																		$img_path = FCPATH.'uploads/item_images/'.$item_img;
+																	}
+																else
+																	{
+																		$img_path = '';
+																	}
 													?>
 													<tr>
 														<td><?=$i;?></td>
@@ -88,7 +98,7 @@
                             <td><?php echo GetSupplierData( $item_data->SUPPLIER_ID )->supplier_name;?></td>
                             <td><?=$item_data->ITEM_CODE;?></td>
 														<td>
-															<?php if( $item_img ): ?>
+															<?php if( file_exists( $img_path ) ): ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/item_images/<?php echo $item_img; ?>" />
 															<?php else : ?>
 																<img style="width:100px;" src="<?=base_url();?>uploads/no-image-available.jpg" />

@@ -57,11 +57,16 @@
 										<form action="#" method="POST">
 
 											<div class="col-xs-3">
-												<select id="sv_items" class="item-ajax form-control sv_item" name="item[]" multiple></select>
+												<select id="sv_items" class="item-ajax form-control sv_item" name="item[]" multiple>
+													<?php if( $_POST['item'] && !isset($_POST['all'] ) ) {
+														foreach( $_POST['item'] as $item ) : ?>
+																<option selected value ="<?php echo $item; ?>"><?php echo GetItemData( $item )->ITEM_CODE; ?></option>
+														<?php endforeach; } ?>
+												</select>
 											</div>
 
 											<div class="col-xs-2">
-												<input type="checkbox" name="all" id="checkbox" value=""> Select All
+												<input type="checkbox" <?php if( isset( $_POST['all'] ) ) { echo "checked"; } ?> name="all" id="checkbox" value=""> Select All
 											</div>
 
 											<div class="col-xs-3">
@@ -100,7 +105,16 @@
                                                       	if( isset($_POST["item"]) && !empty($_POST["item"]) )
                                                       		{
                                                         		$itemss = $_POST['item'];
-                                                      		}
+                                                      		}// 
+//                                                       	else
+//                                                       		{
+//                                                       			$items = GetItem();
+//                                                       			
+//                                                       			foreach($items as $item)
+//                                                           			{
+//                                                             			$itemss[] = $item['ITEM_ID'];
+//                                                           			}    
+//                                                       		}
 
                                                       	// IF CHECKBOX SELECTED , SHOW ALL ITEMS
                                                       	// if( isset($_POST['all']) )
@@ -242,10 +256,10 @@
 
         </script>
 
-       	<?php if( isset($_POST['all']) ) { ?>
-       	
+       <?php if( empty($_POST) || isset($_POST['all']) ) : ?>
+       
 			<script type="text/javascript">
-			
+		
 				$(document).ready(function()
 					{
 						var dataTable = $('#item_pending').DataTable({
@@ -269,23 +283,7 @@
 					});
 			</script>
 			
-		<?php } else { ?>
-			
-			<script type="text/javascript">
-			
-				$(document).ready(function()
-					{
-						var dataTable = $('#item_pending').DataTable({
-							"processing": false,
-							"serverSide": false,
-							"aoColumnDefs": [
-								{ 'bSortable': false, 'aTargets': [ 'nosort' ] }
-							]
-						});
-					});
-			</script>
-			
-		<?php } ?>
+		<?php endif; ?>
 		
 		<script type="text/javascript">
             // $("#checkbox").click(function(){
